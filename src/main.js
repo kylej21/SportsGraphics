@@ -1,26 +1,35 @@
-import { scene, camera, renderer, controls } from './scene.js';
-import { Player } from './models/Player.js';
+import * as THREE from 'three';
+import { scene, camera, renderer } from './scene.js';
 import { Ball } from './models/Ball.js';
 import { Hoop } from './models/Hoop.js';
-import { handleInput } from './input.js';
+import { PlayerController, handleInput, followingBall } from './playercontrols/playermovement.js';
+import { setupInputHandlers } from './playercontrols/keys.js';
 
-const player = new Player();
-const ball = new Ball();
-const hoop = new Hoop();
+setupInputHandlers();
 
-scene.add(player.mesh);
-scene.add(ball.mesh);
-scene.add(hoop.mesh);
+const player = new PlayerController();
+const ball = new Ball(scene, () => {});
+const hoop = new Hoop(scene);
 
-camera.position.z = 10;
+handleInput(ball);
 
 function animate() {
   requestAnimationFrame(animate);
-  ball.update(); 
-  controls.update();
+
+  player.update();
+
+  if (ball.mesh) {
+    ball.update(hoop.mesh);
+  }
+
+  if (ball.mesh && followingBall) {
+    ball.mesh.position.copy(player.position);
+    const { cameraPos, lookAt } = player.getCameraTransform();
+    camera.position.copy(cameraPos);
+    camera.lookAt(lookAt);
+  }
+
   renderer.render(scene, camera);
 }
-
-handleInput(ball); 
 
 animate();

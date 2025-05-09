@@ -1,28 +1,21 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createLighting } from './lighting.js';
 
 // scene
 export const scene = new THREE.Scene();
-const loader = new THREE.TextureLoader();
-loader.load('/th.jpeg', function(texture) { // can change this background. Keeping as placeholder code
+/*const loader = new THREE.TextureLoader();
+loader.load('/court.jpeg', function(texture) { // can change this background. Keeping as placeholder code
     scene.background = texture;
   });
-
-// lights
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(5, 10, 5);
-scene.add(light);
-
+*/
+scene.background = new THREE.Color(0x000000);
 
 // camera
-export const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.set(-5, 5, 10);
-camera.lookAt(0, 1, -5)
+export const camera = new THREE.PerspectiveCamera(75, window.innerHeight/window.innerWidth, 0.3, 1000);
+
+camera.position.set(0, 2.2, 0.5); 
+camera.lookAt(0, 2.1, -1);
 
 // renderer 
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -35,3 +28,5 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.target.set(0, 1, -5);    
 controls.update();
+
+createLighting(scene);

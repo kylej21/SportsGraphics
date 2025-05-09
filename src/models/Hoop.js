@@ -1,11 +1,23 @@
-import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export class Hoop {
-  constructor() {
-    const ring = new THREE.TorusGeometry(0.6, 0.05, 16, 100);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    this.mesh = new THREE.Mesh(ring, material);
-    this.mesh.rotation.x = Math.PI / 2;
-    this.mesh.position.set(0, 3.5, -5);
+  constructor(scene, onLoad = () => {}) {
+    const loader = new GLTFLoader();
+
+    loader.load('/basket_ball.glb', (gltf) => {
+      const hoopMesh = gltf.scene.getObjectByName('BasktBallBasket_Optimized');
+
+      if (!hoopMesh) {
+        console.warn('Hoop mesh not found in GLB');
+        return;
+      }
+
+      hoopMesh.position.set(0, 3.5, -5);
+      this.mesh = hoopMesh;
+      scene.add(this.mesh);
+      onLoad(this.mesh);
+    }, undefined, (error) => {
+      console.error('Error loading hoop model:', error);
+    });
   }
 }
