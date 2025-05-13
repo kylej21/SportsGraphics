@@ -6,6 +6,8 @@ import Hole from './models/Hole';
 export function loadLevel(levelData, scene) {
   const tileSize = 1;
   let startPosition = null;
+  const width = levelData[0].length;
+  const height = levelData.length;
 
   levelData.forEach((row, z) => {
     row.forEach((cell, x) => {
@@ -18,15 +20,22 @@ export function loadLevel(levelData, scene) {
           scene.add(Ground(position));
           break;
         case 'X':
+          scene.add(Ground(position));
           scene.add(Hole(position));
           break;
         case 'S':
-          scene.add(Ground(position)); 
+          scene.add(Ground(position));
           startPosition = position.clone();
           break;
       }
     });
   });
 
-  return startPosition;
+  const bounds = {
+    width: width * tileSize,
+    height: height * tileSize,
+  };
+
+  return { startPosition, bounds };
 }
+
