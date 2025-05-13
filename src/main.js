@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import hole1 from './holes/hole1.js';
+import hole2 from './holes/hole2.js';
 import { loadLevel } from './levelparser.js';
 import Ball from './models/Ball.js';
-import { addGroundPlane , SkyDome, getCourseTileCenters} from './worldbuilder.js';
+import {generateHazelnuts, addGroundPlane , SkyDome, getCourseTileCenters} from './worldbuilder.js';
 import RoughField from './models/RoughField.js';
 
 let camera, scene, renderer, controls;
@@ -44,11 +45,28 @@ function init() {
 
   const { startPosition, bounds } = loadLevel(hole1, scene);
   const courseTileArray = getCourseTileCenters(hole1);
+
+  
+  
   const tileCount = courseTileArray.length / 2;
 
   addGroundPlane(scene, bounds);
-  scene.add(RoughField(bounds, courseTileArray, tileCount));
+  const domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
   scene.add(SkyDome(bounds));
+  scene.add(RoughField(bounds, courseTileArray, tileCount, domeRadius));
+
+  const loader = new OBJLoader();
+  loader.load('/Hazelnut.obj', (object) => {
+    const hazelnut = object;
+    scene.add(generateHazelnuts(hazelnut, domeRadius, courseTileArray));
+    
+    hazelnut.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  });
 
   if (!startPosition) {
     console.error('No start position found in level data');

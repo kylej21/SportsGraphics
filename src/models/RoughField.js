@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import GrassShaderMaterial from '../shaders/GrassBlades.js';
 
-export default function RoughField(bounds, courseTileData, tileCount) {
+export default function RoughField(bounds, courseTileArray, tileCount, domeRadius) {
   const bladeCount = 100000;
   const dummy = new THREE.Object3D();
   const geometry = new THREE.PlaneGeometry(0.03, 0.1, 1, 4);
@@ -13,11 +13,11 @@ export default function RoughField(bounds, courseTileData, tileCount) {
   }
   geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(offsetArray, 1));
 
-  const material = GrassShaderMaterial(courseTileData, tileCount);
+  const material = GrassShaderMaterial(courseTileArray, tileCount);
   const mesh = new THREE.InstancedMesh(geometry, material, bladeCount);
 
-  const spreadX = bounds.width + 15;
-  const spreadZ = bounds.height + 15;
+  const spreadX = domeRadius * 2;
+  const spreadZ = domeRadius * 2;
 
   for (let i = 0; i < bladeCount; i++) {
     const x = (Math.random() - 0.5) * spreadX + bounds.width / 2;
