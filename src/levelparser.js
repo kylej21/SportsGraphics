@@ -14,11 +14,14 @@ export function loadLevel(levelData, scene) {
       const position = new THREE.Vector3(x * tileSize, 0, z * tileSize);
 
       if (cell === '0' || cell === 'X' || cell === 'S') {
-        scene.add(Ground(position));
         if (cell === 'X') {
           scene.add(Hole(position));
         } else if (cell === 'S') {
           startPosition = position.clone();
+          scene.add(Ground(position));
+        }
+        else{
+          scene.add(Ground(position));
         }
       } else if (/^[LRTB]+$/.test(cell)) {
         scene.add(Wall.createWallsFromString(position, cell));
