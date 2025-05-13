@@ -11,6 +11,13 @@ import RoughField from './models/RoughField.js';
 let camera, scene, renderer, controls;
 let ball;
 const clock = new THREE.Clock();
+const keyStates = {
+  ArrowUp: false,
+  ArrowDown: false,
+  ArrowLeft: false,
+  ArrowRight: false,
+}
+let hazelnutTrees = []
 
 init();
 animate();
@@ -32,8 +39,15 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'r') {
+      camera.position.set(ball.position.x + 1, ball.position.y + 1, ball.position.z);
+      camera.lookAt(ball.position);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => keyStates[event.key] = true);
+  document.addEventListener('keyup', (event) => keyStates[event.key] = false);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
@@ -58,7 +72,16 @@ function init() {
   const loader = new OBJLoader();
   loader.load('/Hazelnut.obj', (object) => {
     const hazelnut = object;
-    scene.add(generateHazelnuts(hazelnut, domeRadius, courseTileArray));
+    const treeGroup = generateHazelnuts(hazelnut, domeRadius, courseTileArray);
+    scene.add(treeGroup);
+
+    treeGroup.traverse((child) => {
+      if (child.isMesh ) {
+        if( child.name.includes('tree') || child.name.includes('leaf') || child.name.includes('leaves') ) {
+        hazelnutTrees.push(child);
+      }
+    }
+    });
     
     hazelnut.traverse((child) => {
       if (child.isMesh) {
@@ -74,6 +97,15 @@ function init() {
   }
   ball = new Ball(startPosition);
   scene.add(ball);
+  controls = new OrbitControls(camera, renderer.domElement);
+  if( ball !== undefined ) {
+    controls.target.copy( ball.position );
+  }
+  controls.enableDamping = true;
+  controls.saveState();
+
+  camera.position.set(ball.position.x + 1, ball.position.y+1, ball.position.z);
+  camera.lookAt(ball.position);
 
   
 }
@@ -81,20 +113,58 @@ function init() {
 
 
 function animate() {
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animate); 
+
+  
+
   scene.traverse((child) => {
-    const mat = child.material;
-    if (mat?.uniforms?.time) {
-      mat.uniforms.time.value = clock.getElapsedTime();
-    }
+     const mat = child.material;
+     if (mat?.uniforms?.time) {
+       mat.uniforms.time.value = clock.getElapsedTime();
+     }
     if (child.material?.uniforms?.time) {
       child.material.uniforms.time.value = clock.getElapsedTime();
     }
+    const speed = 0.0005;
+    const dir = new THREE.Vector3();
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    const right = new THREE.Vector3().crossVectors( cameraDirection, camera.up ).normalize();
+
+    if (keyStates.ArrowUp) camera.position.x -= speed;
+    if (keyStates.ArrowDown) camera.position.x += speed;
+    if (keyStates.ArrowLeft) camera.position.z += speed;
+    if (keyStates.ArrowRight) camera.position.z -= speed;
+
+    hazelnutTrees.forEach(tree => tree.visible = true);
+  
+  const cameraPos = camera.position;
+  const ballPos = ball.position;
+  const pathVector = new THREE.Vector3().subVectors(ballPos, cameraPos);
+  const pathLength = pathVector.length();
+
+  if (pathLength > 0.1) { 
+    hazelnutTrees.forEach(tree => {
+      const treePos = tree.getWorldPosition(new THREE.Vector3());
+      const treeToCamera = new THREE.Vector3().subVectors(treePos, cameraPos);
+      
+      const projection = treeToCamera.dot(pathVector) / pathLength;
+      if (projection >= -0.5 && projection <= pathLength + 0.2) { //adjust if you want more/less restrictive tree hiding behind camera or ball
+        const closestPoint = cameraPos.clone()
+          .add(pathVector.clone().multiplyScalar(projection/pathLength));
+        const distanceToPath = closestPoint.distanceTo(treePos);
+        
+        const effectiveRadius = 2.5 * (1 + treePos.y/3); //make this value higher to make the zone you hide trees in larger
+        if (distanceToPath < effectiveRadius) {
+          tree.visible = false;
+        }
+      }
+    });
+  }
+    
   });
 
-
-
-
+  controls.target.copy(ball.position);
   controls.update();
   renderer.render(scene, camera);
 }
