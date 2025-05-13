@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import SkyDomeShaderMaterial from './shaders/SkyShader.js';
 
 const textureLoader = new THREE.TextureLoader();
 const barkTexture = textureLoader.load('/HazelnutBark.png');
@@ -20,7 +21,7 @@ export function generateHazelnuts(baseModel, domeRadius, courseTileArray) {
     courseTilesSet.add(`${x}_${z}`);
   }
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 30; i++) {
     const x = (Math.random() - 0.25) * domeRadius * 2;
     const z = (Math.random() - 0.25) * domeRadius * 2;
 
@@ -90,15 +91,29 @@ export function addGroundPlane(scene, bounds) {
 }
 
 export function SkyDome(bounds) {
-  const radius = Math.max(bounds.width, bounds.height) * 1.1;
-  const geometry = new THREE.SphereGeometry(radius, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x87ceeb,
-    side: THREE.BackSide,
-  });
+  const skytextureLoader = new THREE.TextureLoader();
+  const silhouetteTex = skytextureLoader.load('/sunset.png');
 
-  const dome = new THREE.Mesh(geometry, material);
-  dome.position.set(bounds.width / 2 - 0.5, 0, bounds.height / 2 - 0.5);
+  const radius = Math.max(bounds.width, bounds.height) * 1.1;
+
+  const geometry = new THREE.SphereGeometry(
+    radius,
+    32,
+    32,
+    0,
+    Math.PI * 2,
+    0,
+    Math.PI / 2
+  );
+
+  const skyMaterial = SkyDomeShaderMaterial(silhouetteTex);
+  const dome = new THREE.Mesh(geometry, skyMaterial);
+
+  dome.position.set(
+    bounds.width / 2 - 0.5,
+    0,
+    bounds.height / 2 - 0.5
+  );
 
   return dome;
 }
