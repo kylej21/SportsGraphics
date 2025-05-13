@@ -22,11 +22,11 @@ function createWall(geometry, position, offset = {}) {
 }
 
 function createLeftWall(position) {
-  return createWall(new THREE.BoxGeometry(0.1, 0.2, 1), position, { x: -0.45 });
+  return createWall(new THREE.BoxGeometry(0.1, 0.2001, 1.001), position, { x: -0.45 });
 }
 
 function createRightWall(position) {
-  return createWall(new THREE.BoxGeometry(0.1, 0.2, 1), position, { x: +0.45 });
+  return createWall(new THREE.BoxGeometry(0.1, 0.2001, 1.001), position, { x: +0.45 });
 }
 
 function createTopWall(position) {
