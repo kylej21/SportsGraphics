@@ -1,13 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Project</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="/src/main.js"></script>
-	</body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Golf Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="splash-overlay">
+    <div id="splash-container">
+      <h1>ThreeJS Mini Golf</h1>
+      <div class="splash-columns">
+        <div class="splash-left">
+          <h2>Controls</h2>
+          <ul>
+            <li>⮕ Arrow Keys / WASD – Move camera</li>
+            <li>🖱 Click & drag – Aim</li>
+            <li>␣ Spacebar – Shoot</li>
+            <li>R – Reset Ball</li>
+          </ul>
+        </div>
+        <div class="splash-right">
+          <h2>Level Select</h2>
+          <button class="level-btn" data-level="hole1">Hole 1</button>
+          <button class="level-btn" data-level="hole2">Hole 2</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
 </html>
