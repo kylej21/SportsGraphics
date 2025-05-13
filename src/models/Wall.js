@@ -21,82 +21,33 @@ function createWall(geometry, position, offset = {}) {
   return mesh;
 }
 
-export function WallVL(position) {
-  return createWall(new THREE.BoxGeometry(0.1, 0.2, 1), position, { x: 0.45 });
+function createLeftWall(position) {
+  return createWall(new THREE.BoxGeometry(0.1, 0.2001, 1.001), position, { x: -0.45 });
 }
 
-export function WallVR(position) {
-  return createWall(new THREE.BoxGeometry(0.1, 0.2, 1), position, { x: -0.45 });
+function createRightWall(position) {
+  return createWall(new THREE.BoxGeometry(0.1, 0.2001, 1.001), position, { x: +0.45 });
 }
 
-export function WallHT(position) {
-  return createWall(new THREE.BoxGeometry(1, 0.2, 0.1), position, { z: 0.45 });
-}
-
-export function WallHB(position) {
+function createTopWall(position) {
   return createWall(new THREE.BoxGeometry(1, 0.2, 0.1), position, { z: -0.45 });
+}
+
+function createBottomWall(position) {
+  return createWall(new THREE.BoxGeometry(1, 0.2, 0.1), position, { z: +0.45 });
+}
+
+export function createWallsFromString(position, wallString) {
+  const group = new THREE.Group();
+
+  if (wallString.includes('L')) group.add(createLeftWall(position));
+  if (wallString.includes('R')) group.add(createRightWall(position));
+  if (wallString.includes('T')) group.add(createTopWall(position));
+  if (wallString.includes('B')) group.add(createBottomWall(position));
+
+  return group;
 }
 
 export function WallCorner(position) {
   return createWall(new THREE.BoxGeometry(0.15, 0.2, 0.15), position);
-}
-
-export function WallLU(position) {
-  const group = new THREE.Group();
-  group.add(WallVR(position));
-  group.add(WallHT(position));
-  group.add(WallHB(position));
-  return group;
-}
-
-export function WallRU(position) {
-  const group = new THREE.Group();
-  group.add(WallVL(position));
-  group.add(WallHT(position));
-  group.add(WallHB(position));
-  return group;
-}
-
-export function WallUU(position) {
-  const group = new THREE.Group();
-  group.add(WallVL(position));
-  group.add(WallVR(position));
-  group.add(WallHB(position));
-  return group;
-}
-
-export function WallDU(position) {
-  const group = new THREE.Group();
-  group.add(WallVL(position));
-  group.add(WallVR(position));
-  group.add(WallHT(position));
-  return group;
-}
-
-export function WallLR(position) {
-  const group = new THREE.Group();
-  group.add(WallVL(position));
-  group.add(WallVR(position));
-  return group;
-}
-
-export function WallTB(position) {
-  const group = new THREE.Group();
-  group.add(WallHT(position));
-  group.add(WallHB(position));
-  return group;
-}
-
-export function WallLT(position) {
-  const group = new THREE.Group();
-  group.add(WallVR(position));
-  group.add(WallHB(position));
-  return group;
-}
-
-export function WallRB(position) {
-  const group = new THREE.Group();
-  group.add(WallVL(position));
-  group.add(WallHT(position));
-  return group;
 }

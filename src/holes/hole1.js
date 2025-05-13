@@ -1,9 +1,9 @@
 const hole1 = [
-  ['C', 'HT', 'HT', 'HT', 'C'],
-  ['VL', '0', '0', 'X', 'VR'],
-  ['VL', '0', 'LU', 'TB', 'C'],
-  ['VL', '0', '0', 'S', 'VR'],
-  ['C', 'HB', 'HB', 'HB', 'C']
+  ['C',  'B', 'B',  'B', 'C'],
+  ['R',  '0',  '0',  'X',  'L'],
+  ['R',  '0',  'LTB', 'TB', 'C'],
+  ['R',  '0',  '0',  'S',  'L'],
+  ['C',  'T', 'T',  'T', 'C']
 ];
 
-export default hole1;
+export default hole1
