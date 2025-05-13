@@ -1,0 +1,86 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #000;
+}
+
+#splash-overlay {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+#splash-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#splash-container {
+  width: 80vw;
+  height: 80vh;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem;
+}
+
+#splash-container h1 {
+  text-align: center;
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+}
+
+.splash-columns {
+  display: flex;
+  flex: 1;
+  gap: 3rem;
+  justify-content: space-between;
+}
+
+.splash-left, .splash-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.splash-left h2,
+.splash-right h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.splash-left ul {
+  list-style: none;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.level-btn {
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background-color 0.25s ease;
+}
+
+.level-btn:hover {
+  background-color: #e84118;
+}
