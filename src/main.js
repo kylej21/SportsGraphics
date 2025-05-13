@@ -83,11 +83,14 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
   scene.traverse((child) => {
-  const mat = child.material;
-  if (mat?.uniforms?.time) {
-    mat.uniforms.time.value = clock.getElapsedTime();
-  }
-});
+    const mat = child.material;
+    if (mat?.uniforms?.time) {
+      mat.uniforms.time.value = clock.getElapsedTime();
+    }
+    if (child.material?.uniforms?.time) {
+      child.material.uniforms.time.value = clock.getElapsedTime();
+    }
+  });
 
 
 

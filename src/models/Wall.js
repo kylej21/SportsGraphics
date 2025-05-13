@@ -17,6 +17,7 @@ function createWall(geometry, position, offset = {}) {
 
   mesh.receiveShadow = true;
   mesh.castShadow = true;
+
   return mesh;
 }
 

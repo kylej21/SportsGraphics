@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import SkyDomeShaderMaterial from './shaders/SkyShader.js';
+import LeafSwayShader from './shaders/LeafShader.js';
 
 const textureLoader = new THREE.TextureLoader();
 const barkTexture = textureLoader.load('/HazelnutBark.png');
@@ -39,18 +40,15 @@ export function generateHazelnuts(baseModel, domeRadius, courseTileArray) {
     if (overlapsCourse) continue;
 
     const nut = baseModel.clone();
+    const swayMaterial = LeafSwayShader(leavesTexture, leavesAlpha);
+
     nut.traverse((child) => {
       if (child.isMesh) {
         const name = child.name.toLowerCase();
         if (name.includes('tree')) {
           child.material = new THREE.MeshStandardMaterial({ map: barkTexture });
         } else if (name.includes('leaf') || name.includes('leaves')) {
-          child.material = new THREE.MeshStandardMaterial({
-            map: leavesTexture,
-            alphaMap: leavesAlpha,
-            transparent: true,
-            side: THREE.DoubleSide
-          });
+          child.material = swayMaterial;
         } else {
           child.material = new THREE.MeshStandardMaterial({ color: 'green' });
         }
