@@ -10,6 +10,13 @@ import RoughField from './models/RoughField.js';
 let camera, scene, renderer, controls;
 let ball;
 const clock = new THREE.Clock();
+const keyStates = {
+  ArrowUp: false,
+  ArrowDown: false,
+  ArrowLeft: false,
+  ArrowRight: false,
+}
+let hazelnutTrees = []
 
 init();
 animate();
@@ -31,8 +38,15 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'r') {
+      camera.position.set(ball.position.x + 1, ball.position.y + 1, ball.position.z);
+      camera.lookAt(ball.position);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => keyStates[event.key] = true);
+  document.addEventListener('keyup', (event) => keyStates[event.key] = false);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
@@ -57,7 +71,16 @@ function init() {
   const loader = new OBJLoader();
   loader.load('/Hazelnut.obj', (object) => {
     const hazelnut = object;
-    scene.add(generateHazelnuts(hazelnut, domeRadius, courseTileArray));
+    const treeGroup = generateHazelnuts(hazelnut, domeRadius, courseTileArray);
+    scene.add(treeGroup);
+
+    treeGroup.traverse((child) => {
+      if (child.isMesh ) {
+        if( child.name.includes('tree') || child.name.includes('leaf') || child.name.includes('leaves') ) {
+        hazelnutTrees.push(child);
+      }
+    }
+    });
     
     hazelnut.traverse((child) => {
       if (child.isMesh) {
@@ -73,6 +96,15 @@ function init() {
   }
   ball = new Ball(startPosition);
   scene.add(ball);
+  controls = new OrbitControls(camera, renderer.domElement);
+  if( ball !== undefined ) {
+    controls.target.copy( ball.position );
+  }
+  controls.enableDamping = true;
+  controls.saveState();
+
+  camera.position.set(ball.position.x + 1, ball.position.y+1, ball.position.z);
+  camera.lookAt(ball.position);
 
   
 }
@@ -80,12 +112,15 @@ function init() {
 
 
 function animate() {
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animate); 
+
+  
+
   scene.traverse((child) => {
-    const mat = child.material;
-    if (mat?.uniforms?.time) {
-      mat.uniforms.time.value = clock.getElapsedTime();
-    }
+     const mat = child.material;
+     if (mat?.uniforms?.time) {
+       mat.uniforms.time.value = clock.getElapsedTime();
+     }
     if (child.material?.uniforms?.time) {
       child.material.uniforms.time.value = clock.getElapsedTime();
     }
