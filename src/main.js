@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import hole1 from './holes/hole1.js';
-import hole2 from './holes/hole2.js';
 import { loadLevel } from './levelparser.js';
 import Ball from './models/Ball.js';
 import {generateHazelnuts, addGroundPlane , SkyDome, getCourseTileCenters} from './worldbuilder.js';
@@ -91,7 +90,6 @@ function animate() {
       child.material.uniforms.time.value = clock.getElapsedTime();
     }
   });
-
 
 
 
