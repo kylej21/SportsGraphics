@@ -32,8 +32,8 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  // controls = new OrbitControls(camera, renderer.domElement);
+  // controls.enableDamping = true;
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
@@ -75,6 +75,14 @@ function init() {
   ball = new Ball(startPosition);
   scene.add(ball);
 
+  camera.position.copy(ball.position);
+  camera.position.y += 2;
+  camera.lookAt( 
+    ball.position.x,
+    ball.position.y,
+    ball.position.z + 1
+  )
+
   
 }
 
@@ -83,10 +91,10 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
   scene.traverse((child) => {
-    const mat = child.material;
-    if (mat?.uniforms?.time) {
-      mat.uniforms.time.value = clock.getElapsedTime();
-    }
+    // const mat = child.material;
+    // if (mat?.uniforms?.time) {
+    //   mat.uniforms.time.value = clock.getElapsedTime();
+    // }
     if (child.material?.uniforms?.time) {
       child.material.uniforms.time.value = clock.getElapsedTime();
     }
@@ -95,7 +103,7 @@ function animate() {
 
 
 
-  controls.update();
+  //controls.update();
   renderer.render(scene, camera);
 }
 
