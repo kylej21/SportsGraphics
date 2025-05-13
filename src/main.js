@@ -87,8 +87,9 @@ function loadAndStartLevel(holeKey) {
   const loader = new OBJLoader();
   loader.load('/Hazelnut.obj', (object) => {
     const hazelnut = object;
-    scene.add(generateHazelnuts(hazelnut, Math.max(bounds.width, bounds.height) * 1.1, courseTileArray));
+    //scene.add(generateHazelnuts(hazelnut, Math.max(bounds.width, bounds.height) * 1.1, courseTileArray));
 
+    const domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
     const treeGroup = generateHazelnuts(hazelnut, domeRadius, courseTileArray);
     scene.add(treeGroup);
 
@@ -145,8 +146,6 @@ function setupLevelButtons() {
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = clock.getElapsedTime();
-
-  requestAnimationFrame(animate); 
 
   
 
