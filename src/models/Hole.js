@@ -6,8 +6,7 @@ export default function Hole(position) {
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.copy(position);
-  mesh.position.y += 0.005; // Just above ground
-
+  mesh.position.y += 0.1;
   mesh.receiveShadow = true;
 
   return mesh;
