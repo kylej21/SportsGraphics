@@ -11,7 +11,12 @@ import RoughField from './models/RoughField.js';
 let camera, scene, renderer, controls;
 let ball;
 const clock = new THREE.Clock();
-const cameraPivot = new THREE.Object3D();
+const keyStates = {
+  ArrowUp: false,
+  ArrowDown: false,
+  ArrowLeft: false,
+  ArrowRight: false,
+}
 
 init();
 animate();
@@ -39,6 +44,9 @@ function init() {
       camera.lookAt(ball.position);
     }
   });
+
+  document.addEventListener('keydown', (event) => keyStates[event.key] = true);
+  document.addEventListener('keyup', (event) => keyStates[event.key] = false);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
@@ -96,7 +104,6 @@ function init() {
 
 function animate() {
   requestAnimationFrame(animate);
-  cameraPivot.position.copy(ball.position);
   scene.traverse((child) => {
      const mat = child.material;
      if (mat?.uniforms?.time) {
@@ -105,6 +112,18 @@ function animate() {
     if (child.material?.uniforms?.time) {
       child.material.uniforms.time.value = clock.getElapsedTime();
     }
+    const speed = 0.0005;
+    const dir = new THREE.Vector3();
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    const right = new THREE.Vector3().crossVectors( cameraDirection, camera.up ).normalize();
+
+    if (keyStates.ArrowUp) camera.position.x -= speed;
+    if (keyStates.ArrowDown) camera.position.x += speed;
+    if (keyStates.ArrowLeft) camera.position.z += speed;
+    if (keyStates.ArrowRight) camera.position.z -= speed;
+    controls.target.copy(ball.position);
+    controls.update();
   });
 
 
