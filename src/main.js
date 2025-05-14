@@ -150,31 +150,53 @@ function animate() {
   requestAnimationFrame(animate); 
   const elapsed = clock.getElapsedTime();
 
-    const speed = 0.08;
-    const currentX = camera.position.x;
-    const currentY = camera.position.y;
-    const currentZ = camera.position.z;
+  const speed = 0.08;
+  const currentY = camera.position.y;
+    hazelnutTrees.forEach(tree => tree.visible = true);
+  
+  const cameraPos = camera.position;
+  const ballPos = ball.position;
+  const pathVector = new THREE.Vector3().subVectors(ballPos, cameraPos);
+  const pathLength = pathVector.length();
+  if (pathLength > 0.1) { 
+    hazelnutTrees.forEach(tree => {
+      const treePos = tree.getWorldPosition(new THREE.Vector3());
+      const treeToCamera = new THREE.Vector3().subVectors(treePos, cameraPos);
+      
+      const projection = treeToCamera.dot(pathVector) / pathLength;
+      if (projection >= -0.5 && projection <= pathLength + 0.2) { //adjust if you want more/less restrictive tree hiding behind camera or ball
+        const closestPoint = cameraPos.clone()
+          .add(pathVector.clone().multiplyScalar(projection/pathLength));
+        const distanceToPath = closestPoint.distanceTo(treePos);
+        
+        const effectiveRadius = 2.5 * (1 + treePos.y/3); //make this value higher to make the zone you hide trees in larger
+        if (distanceToPath < effectiveRadius) {
+          tree.visible = false;
+        }
+      }
+    });
+  }
     let movementDirection;
     if (keyStates.ArrowUp) {
-      console.log(camera.position.x, camera.position.z);
+      //console.log(camera.position.x, camera.position.z);
       //if( camera.position.x - speed > -width )
         camera.position.x -= speed;
         movementDirection = 'x';
     }
     if (keyStates.ArrowDown) {
-      console.log(camera.position.x, camera.position.z);
+      //console.log(camera.position.x, camera.position.z);
       //if( camera.position.x + speed < width )
         camera.position.x += speed;
         movementDirection = 'x';
     }
     if (keyStates.ArrowLeft) {
-      console.log(camera.position.x, camera.position.z);
+      //console.log(camera.position.x, camera.position.z);
       //if( camera.position.z + speed < height )
         camera.position.z += speed;
         movementDirection = 'z';
     }
     if (keyStates.ArrowRight) {
-      console.log(camera.position.x, camera.position.z);
+      //console.log(camera.position.x, camera.position.z);
       //if( camera.position.z - speed > -height )
         camera.position.z -= speed;
         movementDirection = 'z';
@@ -183,7 +205,7 @@ function animate() {
     const distanceToCenter = cameraToCenter.length();
 
     //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
-    console.log("OLD values", currentX, currentZ);
+    //console.log("OLD values", currentX, currentZ);
     if( distanceToCenter > domeRadius ) {
       cameraToCenter.normalize().multiplyScalar(domeRadius);
       camera.position.copy(domeCenter).add(cameraToCenter);
