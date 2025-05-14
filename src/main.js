@@ -153,34 +153,43 @@ function animate() {
     const speed = 0.08;
     const width = selectedLevel[ 0 ].length;
     const height = selectedLevel.length;
+    const currentX = camera.position.x;
+    const currentY = camera.position.y;
+    const currentZ = camera.position.z;
+    let movementDirection;
     if (keyStates.ArrowUp) {
       console.log(camera.position.x, camera.position.z);
       //if( camera.position.x - speed > -width )
         camera.position.x -= speed;
+        movementDirection = 'x';
     }
     if (keyStates.ArrowDown) {
       console.log(camera.position.x, camera.position.z);
       //if( camera.position.x + speed < width )
         camera.position.x += speed;
+        movementDirection = 'x';
     }
     if (keyStates.ArrowLeft) {
       console.log(camera.position.x, camera.position.z);
       //if( camera.position.z + speed < height )
         camera.position.z += speed;
+        movementDirection = 'z';
     }
     if (keyStates.ArrowRight) {
       console.log(camera.position.x, camera.position.z);
       //if( camera.position.z - speed > -height )
         camera.position.z -= speed;
+        movementDirection = 'z';
     }
     const cameraToCenter = new THREE.Vector3().subVectors(camera.position, domeCenter);
     const distanceToCenter = cameraToCenter.length();
-    domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
 
+    domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+    console.log("OLD values", currentX, currentZ);
     if( distanceToCenter > domeRadius ) {
-      let oldCameraPos = camera.position.clone();
       cameraToCenter.normalize().multiplyScalar(domeRadius);
       camera.position.copy(domeCenter).add(cameraToCenter);
+      camera.position.y = currentY;
     }
     camera.position.y = Math.max(0.5, camera.position.y);
 
