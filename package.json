@@ -10,7 +10,6 @@
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.2",
     "postcss": "^8.5.3",
-    "rollup": "^4.40.2",
     "source-map-js": "^1.2.1",
     "three": "^0.176.0",
     "tinyglobby": "^0.2.13"
