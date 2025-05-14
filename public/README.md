@@ -12,3 +12,5 @@ stone texture:
 sunset skyline texture: https://pngtree.com/element/down?id=NjY5MDUxNA==&type=1&time=1747114771&token=MzUyYTIwNGQ3ZGM4ZGQ1ZTAxMGY0YTEwM2NlYTI2YzM=&t=0
 
 grass new texture: https://www.freepik.com/free-photo/grass-texture-background_4115918.htm#fromView=keyword&page=1&position=0&uuid=22f4fbb9-e444-4d9e-a7c6-c3e88f1f3803&query=Noise+Texture+Grass
+
+mousedrag.gif: https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExandsNTMxMjFnZmlxODFuYzFnNjJpenRsYmJuYWt2cmx0ODk0NHRwNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/hXO9K51TTuzEjHyzr8/giphy.gif

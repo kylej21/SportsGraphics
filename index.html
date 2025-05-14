@@ -9,26 +9,62 @@
 <body>
   <div id="splash-overlay">
     <div id="splash-container">
-      <h1>ThreeJS Mini Golf</h1>
-      <div class="splash-columns">
-        <div class="splash-left">
-          <h2>Controls</h2>
-          <ul>
-            <li>⮕ Arrow Keys / WASD – Move camera</li>
-            <li>🖱 Click & drag – Aim</li>
-            <li>␣ Spacebar – Shoot</li>
-            <li>R – Reset Ball</li>
-          </ul>
-        </div>
-        <div class="splash-right">
-          <h2>Level Select</h2>
-          <button class="level-btn" data-level="hole1">Hole 1</button>
-          <button class="level-btn" data-level="hole2">Hole 2</button>
-        </div>
+      <div class="title-section">
+        <h1>ThreeJS Mini Golf</h1>
+        <h2>Golf! Hit the ball into the hole in as few strokes as possible!</h2>
       </div>
+        <div class="main-menu">
+          <div class="menu-content"> 
+            <div class="controls-section">
+              <h3>Controls</h3>
+            
+              <div class="mouse-diagram">
+                <img src="mousedrag.gif" alt="Mouse Diagram" />
+                <p>Click & drag to rotate the camera</p>
+              </div>
+            
+              <div class="shot-diagram">
+                <img src="keyboard.png" alt="Press Space Diagram" />
+                <p>Press Space to shoot</p>
+              </div>
+            </div>
+          
+            <div class="levels-section">
+              <h3>Levels</h3>
+              <div class="levels-grid">
+                <button class="level-btn" data-level="hole1">1</button>
+                <button class="level-btn" data-level="hole2">2</button>
+                <button class="level-btn" data-level="hole3">3</button>
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>                
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+                <button class="level-btn locked" disabled>
+                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   </div>
-
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
