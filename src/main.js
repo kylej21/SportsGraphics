@@ -18,6 +18,7 @@ const keyStates = {
   ArrowLeft: false,
   ArrowRight: false,
 }
+let domeRadius, domeCenter, bounds, startPosition;
 let hazelnutTrees = []
 
 init();
@@ -75,6 +76,8 @@ function loadAndStartLevel(holeKey) {
 
   const { startPosition, bounds } = loadLevel(hole, scene);
   const courseTileArray = getCourseTileCenters(hole);
+  domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+  domeCenter = new THREE.Vector3(bounds.width / 2 - 0.5, 0, bounds.height / 2 - 0.5);
   const tileCount = courseTileArray.length / 2;
 
   camera.position.set(3, 3, 3);
@@ -144,10 +147,42 @@ function setupLevelButtons() {
 }
 
 function animate() {
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animate); 
   const elapsed = clock.getElapsedTime();
 
-  
+    const speed = 0.08;
+    const width = selectedLevel[ 0 ].length;
+    const height = selectedLevel.length;
+    if (keyStates.ArrowUp) {
+      console.log(camera.position.x, camera.position.z);
+      //if( camera.position.x - speed > -width )
+        camera.position.x -= speed;
+    }
+    if (keyStates.ArrowDown) {
+      console.log(camera.position.x, camera.position.z);
+      //if( camera.position.x + speed < width )
+        camera.position.x += speed;
+    }
+    if (keyStates.ArrowLeft) {
+      console.log(camera.position.x, camera.position.z);
+      //if( camera.position.z + speed < height )
+        camera.position.z += speed;
+    }
+    if (keyStates.ArrowRight) {
+      console.log(camera.position.x, camera.position.z);
+      //if( camera.position.z - speed > -height )
+        camera.position.z -= speed;
+    }
+    const cameraToCenter = new THREE.Vector3().subVectors(camera.position, domeCenter);
+    const distanceToCenter = cameraToCenter.length();
+    domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+
+    if( distanceToCenter > domeRadius ) {
+      let oldCameraPos = camera.position.clone();
+      cameraToCenter.normalize().multiplyScalar(domeRadius);
+      camera.position.copy(domeCenter).add(cameraToCenter);
+    }
+    camera.position.y = Math.max(0.5, camera.position.y);
 
   scene.traverse((child) => {
      const mat = child.material;
