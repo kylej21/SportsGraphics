@@ -21,6 +21,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vite": "^5.2.8"
-  }
+    "vite": "5.2.8"
+  },
+  "overrides": {
+  "rollup": "3.29.4"
+  } 
+  
 }
