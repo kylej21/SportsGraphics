@@ -151,8 +151,6 @@ function animate() {
   const elapsed = clock.getElapsedTime();
 
     const speed = 0.08;
-    const width = selectedLevel[ 0 ].length;
-    const height = selectedLevel.length;
     const currentX = camera.position.x;
     const currentY = camera.position.y;
     const currentZ = camera.position.z;
@@ -184,7 +182,7 @@ function animate() {
     const cameraToCenter = new THREE.Vector3().subVectors(camera.position, domeCenter);
     const distanceToCenter = cameraToCenter.length();
 
-    domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+    //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
     console.log("OLD values", currentX, currentZ);
     if( distanceToCenter > domeRadius ) {
       cameraToCenter.normalize().multiplyScalar(domeRadius);
