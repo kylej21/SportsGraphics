@@ -1,35 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mini Golf Game</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="https://va.vercel-scripts.com/script.js" data-website-id="prj_NgakFcU51hlTXLMdW6m70kAEgqiC"></script>
-</head>
-<body>
-  <div id="splash-overlay">
-    <div id="splash-container">
-      <div class="title-section">
-        <h1>ThreeJS Mini Golf</h1>
-        <h2>Golf! Hit the ball into the hole in as few strokes as possible!</h2>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Golf Game</title>
+    <link rel="stylesheet" href="style.css" />
+    <script
+      defer
+      src="https://va.vercel-scripts.com/script.js"
+      data-website-id="prj_NgakFcU51hlTXLMdW6m70kAEgqiC"
+    ></script>
+  </head>
+  <body>
+    <div id="splash-overlay">
+      <div id="splash-container">
+        <div class="title-section">
+          <h1>ThreeJS Mini Golf</h1>
+          <h2>
+            Golf! Hit the ball into the hole in as few strokes as possible!
+          </h2>
+        </div>
         <div class="main-menu">
-          <div class="menu-content"> 
+          <div class="menu-content">
             <div class="controls-section">
               <h3>Controls</h3>
-            
+
               <div class="mouse-diagram">
                 <img src="mousedrag.gif" alt="Mouse Diagram" />
                 <p>Click & drag to rotate the camera</p>
               </div>
-            
+
               <div class="shot-diagram">
                 <img src="keyboard.png" alt="Press Space Diagram" />
                 <p>Press Space to shoot</p>
               </div>
             </div>
-          
+
             <div class="levels-section">
               <h3>Levels</h3>
               <div class="levels-grid">
@@ -37,35 +43,39 @@
                 <button class="level-btn" data-level="hole2">2</button>
                 <button class="level-btn" data-level="hole3">3</button>
                 <button class="level-btn locked" disabled>
-                  
-                  <img class="lock-icon" src="lock.png" alt="Locked" />
-                </button>                
-                <button class="level-btn locked" disabled>
-                  
                   <img class="lock-icon" src="lock.png" alt="Locked" />
                 </button>
                 <button class="level-btn locked" disabled>
-                  
                   <img class="lock-icon" src="lock.png" alt="Locked" />
                 </button>
                 <button class="level-btn locked" disabled>
-                  
                   <img class="lock-icon" src="lock.png" alt="Locked" />
                 </button>
                 <button class="level-btn locked" disabled>
-                  
                   <img class="lock-icon" src="lock.png" alt="Locked" />
                 </button>
                 <button class="level-btn locked" disabled>
-                  
+                  <img class="lock-icon" src="lock.png" alt="Locked" />
+                </button>
+                <button class="level-btn locked" disabled>
                   <img class="lock-icon" src="lock.png" alt="Locked" />
                 </button>
               </div>
+              <button id="custom-level-btn">Custom</button>
             </div>
           </div>
         </div>
+      </div>
     </div>
-  </div>
-  <script type="module" src="src/main.js"></script>
-</body>
+    <script type="module" src="src/main.js"></script>
+    <script type="module">
+      import "./src/customlevel.js";
+
+      document
+        .getElementById("custom-level-btn")
+        .addEventListener("click", () => {
+          window.initCustomLevelEditor();
+        });
+    </script>
+  </body>
 </html>

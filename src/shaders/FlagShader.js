@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export default function FlagShaderMaterial() {
   return new THREE.ShaderMaterial({
@@ -42,6 +42,6 @@ export default function FlagShaderMaterial() {
         gl_FragColor = vec4(color, 1.0);
       }
     `,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
 }
