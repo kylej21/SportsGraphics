@@ -22,15 +22,13 @@ let domeRadius, domeCenter, bounds, startPosition;
 let hazelnutTrees = []
 let shotDirection = new THREE.Vector3();
 
-let lastMoveX = 3;
-let lastMoveZ = 3;
 let charge = 0;
 let isMoving = false;
 let isCharging = false;
 let chargeStartTime = 0;
 let chargeDuration = 0;
 let hasTakenFirstShot = false;
-const holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
+let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 
 init();
 
@@ -77,10 +75,10 @@ function setupScene() {
       if(!isMoving){
         isCharging = false;
         chargeDuration = clock.getElapsedTime() - chargeStartTime;
-        fireBall(charge);
+        fireBall();
+        charge = 0;
         hasTakenFirstShot = true;
       }
-      charge = 0;
     }
   });
 
@@ -92,21 +90,18 @@ function setupScene() {
   directionalLight.castShadow = true;
   scene.add(directionalLight);
 }
-function fireBall(chargeDuration) {
-  console.log("charge duration: ", chargeDuration);
-  const chargePower = Math.min(chargeDuration / 100, 1); // Normalized power (0 to 1)
-
+function fireBall() {
+  const chargePower = Math.min(charge / 100, 1); // Normalized power (0 to 1)
+  console.log(chargePower);
   // Get camera's forward direction
   camera.getWorldDirection(shotDirection);
 
   shotDirection.y = 0;
   shotDirection.normalize(); 
 
-  const force = shotDirection.multiplyScalar(chargePower * 0.7); 
+  const force = shotDirection.multiplyScalar(chargePower * 0.3); 
   ball.velocity = force;
-  lastMoveX = ball.position.x;
-  lastMoveZ = ball.position.z;
-  console.log("Fired ball with charge power:", chargePower);
+  //console.log("Fired ball with charge power:", chargePower);
 }
 //console.log(hole.pole.position.x, hole.pole.position.y, hole.pole.position.z);
 function moveCameraToBall() {
@@ -119,9 +114,9 @@ function moveCameraToBall() {
     camera.position.copy(ball.position).add(offset); 
     camera.position.y = 1.1; 
 
-    camera.lookAt(holeTarget);
+    //camera.lookAt(holeTarget);
     if (controls) {
-      controls.target.copy(holeTarget); 
+      controls.target.copy(ball.position); 
       controls.update(); 
     }
   }
@@ -160,8 +155,8 @@ function loadAndStartLevel(holeKey) {
 
   // Clear scene except lights
   scene.children = scene.children.filter(child => child.type === 'AmbientLight' || child.type === 'DirectionalLight');
-  const { startPosition, bounds } = loadLevel(hole, scene);
-
+  const { startPosition, bounds , holeLocation } = loadLevel(hole, scene);
+  holeTarget = new THREE.Vector3(holeLocation.x, 0, holeLocation.z); 
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
   domeCenter = new THREE.Vector3(bounds.width / 2 - 0.5, 0, bounds.height / 2 - 0.5);
@@ -220,7 +215,7 @@ function loadAndStartLevel(holeKey) {
   splashVisible = true;
 }
 function checkWin(ptX, ptZ){
-  let dist = Math.sqrt((ptX-3)**2 + (ptZ-1)**2)
+  let dist = Math.sqrt((ptX-holeTarget.x)**2 + (ptZ-holeTarget.z)**2)
   console.log(dist);
   if (dist < 0.08){
     return true;
@@ -297,7 +292,7 @@ function animate() {
           isMoving = false;
           if (checkWin(ball.position.x, ball.position.z)){
             const overlay = document.getElementById('splash-overlay');
-            overlay.style.display = 'block';  // Show splash screen
+            overlay.style.display = 'flex';  // Show splash screen
             splashVisible = true;
           }
           moveCameraToBall();  // << Move camera when ball stops

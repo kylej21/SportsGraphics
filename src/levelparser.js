@@ -8,14 +8,14 @@ export function loadLevel(levelData, scene) {
   let startPosition = null;
   const width = levelData[0].length;
   const height = levelData.length;
-
+  let holeLocation = null;
   levelData.forEach((row, z) => {
     row.forEach((cell, x) => {
       const position = new THREE.Vector3(x * tileSize, 0, z * tileSize);
-
       if (cell === '0' || cell === 'X' || cell === 'S') {
         if (cell === 'X') {
           scene.add(Hole(position));
+          holeLocation = position;
         } else if (cell === 'S') {
           startPosition = position.clone();
           scene.add(Ground(position));
@@ -63,5 +63,5 @@ export function loadLevel(levelData, scene) {
     height: height * tileSize,
   };
 
-  return { startPosition, bounds };
+  return { startPosition, bounds ,holeLocation};
 }
