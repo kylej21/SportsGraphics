@@ -20,6 +20,16 @@ const keyStates = {
 }
 let domeRadius, domeCenter, bounds, startPosition;
 let hazelnutTrees = []
+let shotDirection = new THREE.Vector3();
+
+let lastMoveX = 3;
+let lastMoveZ = 3;
+let isMoving = false;
+let isCharging = false;
+let chargeStartTime = 0;
+let chargeDuration = 0;
+let hasTakenFirstShot = false;
+const holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 
 init();
 
@@ -46,14 +56,30 @@ function setupScene() {
   document.body.appendChild(renderer.domElement);
 
   document.addEventListener('keydown', (event) => {
+    keyStates[event.key] = true;
     if (event.key === 'r') {
       camera.position.set(ball.position.x + 1, ball.position.y + 1, ball.position.z);
       camera.lookAt(ball.position);
     }
+    if (event.key === ' '){
+      if(!isMoving){
+        isCharging = true;
+        chargeStartTime = clock.getElapsedTime();
+      }
+    }
   });
 
-  document.addEventListener('keydown', (event) => keyStates[event.key] = true);
-  document.addEventListener('keyup', (event) => keyStates[event.key] = false);
+    document.addEventListener('keyup', (event) => {
+    keyStates[event.key] = false;
+    if (event.key === ' '){
+      if(!isMoving){
+        isCharging = false;
+        chargeDuration = clock.getElapsedTime() - chargeStartTime;
+        fireBall(chargeDuration);
+        hasTakenFirstShot = true;
+      }
+    }
+  });
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
@@ -62,6 +88,64 @@ function setupScene() {
   directionalLight.position.set(5, 10, 7.5);
   directionalLight.castShadow = true;
   scene.add(directionalLight);
+}
+function fireBall(chargeDuration) {
+  const maxChargeTime = 2; // Max time for full charge in seconds
+  const chargePower = Math.min(chargeDuration / maxChargeTime, 1); // Normalized power (0 to 1)
+
+  // Get camera's forward direction
+  camera.getWorldDirection(shotDirection);
+
+  shotDirection.y = 0;
+  shotDirection.normalize(); 
+
+  const force = shotDirection.multiplyScalar(chargePower * 0.3); 
+  ball.velocity = force;
+  lastMoveX = ball.position.x;
+  lastMoveZ = ball.position.z;
+  //console.log("Fired ball with charge power:", chargePower);
+}
+//console.log(hole.pole.position.x, hole.pole.position.y, hole.pole.position.z);
+function moveCameraToBall() {
+  if (ball) {
+    const directionToHole = new THREE.Vector3().subVectors(holeTarget, ball.position).normalize();
+    
+    const cameraDistance = 1.5; // Distance behind the ball (adjust as needed)
+    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+
+    camera.position.copy(ball.position).add(offset); 
+    camera.position.y = 1.1; 
+
+    camera.lookAt(holeTarget);
+    if (controls) {
+      controls.target.copy(holeTarget); 
+      controls.update(); 
+    }
+  }
+}
+
+function inBounds(pointx, pointz){
+  //console.log(pointx, pointz);
+  if ((pointx > 3.3741 || pointx < .55069)){
+    return 'x';
+  }
+  if ((pointz > 3.39891 || pointz < .48429)){
+    return 'z';
+  }
+  //(pointx > 1.440625 && pointx < 3.3741)
+  //(pointz < 2.53084 && pointz > .9257)
+  if ((pointx > 1.440625 && pointx < 3.3741) && (pointz < 2.53084 && pointz > 1.42)){
+      let minZ = 0;
+      let diffX = Math.abs(pointx - 1.440625)
+      let diffZ1 = Math.abs(pointz-2.53084)
+      let diffZ2 = Math.abs(pointz - 0.9257)
+      minZ = Math.min(diffZ1, diffZ2);
+      if (minZ < diffX){
+        return 'z';
+      }
+      return 'x';
+  }
+  return 'n';
 }
 
 function loadAndStartLevel(holeKey) {
@@ -73,8 +157,8 @@ function loadAndStartLevel(holeKey) {
 
   // Clear scene except lights
   scene.children = scene.children.filter(child => child.type === 'AmbientLight' || child.type === 'DirectionalLight');
-
   const { startPosition, bounds } = loadLevel(hole, scene);
+
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
   domeCenter = new THREE.Vector3(bounds.width / 2 - 0.5, 0, bounds.height / 2 - 0.5);
@@ -116,7 +200,6 @@ function loadAndStartLevel(holeKey) {
     console.error('No start position found in level data');
     return;
   }
-
   ball = new Ball(startPosition);
   scene.add(ball);
   controls = new OrbitControls(camera, renderer.domElement);
@@ -133,7 +216,14 @@ function loadAndStartLevel(holeKey) {
   // Keep overlay visible until user selects a level
   splashVisible = true;
 }
-
+function checkWin(ptX, ptZ){
+  let dist = Math.sqrt((ptX-3)**2 + (ptZ-1)**2)
+  console.log(dist);
+  if (dist < 0.08){
+    return true;
+  }
+  return false;
+}
 function setupLevelButtons() {
   document.querySelectorAll('.level-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -176,6 +266,50 @@ function animate() {
       }
     });
   }
+
+    if (ball && ball.velocity && Number.isFinite(ball.velocity.x) &&
+        Number.isFinite(ball.velocity.y) &&
+        Number.isFinite(ball.velocity.z)) {
+
+      ball.position.add(ball.velocity);
+      ball.position.y = 0.07
+      ball.velocity.multiplyScalar(0.97);
+      let char = inBounds(ball.position.x, ball.position.z);
+      if (char != 'n') {
+        // Reflect velocity: simple bounce
+        if (char == 'x'){
+          ball.velocity.x *= -0.8;
+        }
+        if (char == 'z'){
+          ball.velocity.z *= -0.8;
+        }
+        // Push the ball slightly back toward the valid area
+        const backstep = ball.velocity.clone().normalize().multiplyScalar(0.05);
+        ball.position.add(backstep);
+      }
+      if (ball.velocity.length() < 0.001) {
+        ball.velocity.set(0, 0, 0);
+
+        if (isMoving) {
+          isMoving = false;
+          if (checkWin(ball.position.x, ball.position.z)){
+            const overlay = document.getElementById('splash-overlay');
+            overlay.style.display = 'block';  // Show splash screen
+            splashVisible = true;
+          }
+          moveCameraToBall();  // << Move camera when ball stops
+        }
+      } else {
+        isMoving = true;
+      }
+
+    } else {
+      if (ball && ball.velocity) {
+        ball.velocity.set(0, 0, 0);
+        isMoving = false;
+      }
+    }
+
     let movementDirection;
     if (keyStates.ArrowUp) {
       //console.log(camera.position.x, camera.position.z);
@@ -226,6 +360,5 @@ function animate() {
   if (!splashVisible) {
     controls.update();
   }
-
   renderer.render(scene, camera);
 }
