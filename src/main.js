@@ -116,9 +116,9 @@ function moveCameraToBall() {
     camera.position.copy(ball.position).add(offset); 
     camera.position.y = 1.1; 
 
-    camera.lookAt(holeTarget);
+    //camera.lookAt(holeTarget);
     if (controls) {
-      controls.target.copy(holeTarget); 
+      controls.target.copy(ball.position); 
       controls.update(); 
     }
   }
