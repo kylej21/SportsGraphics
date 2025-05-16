@@ -30,7 +30,7 @@ let chargeStartTime = 0;
 let chargeDuration = 0;
 let hasTakenFirstShot = false;
 let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
-
+let wallMeshes = [];
 init();
 
 function init() {
@@ -99,7 +99,7 @@ function fireBall(chargeDuration) {
   shotDirection.y = 0;
   shotDirection.normalize(); 
 
-  const force = shotDirection.multiplyScalar(chargePower * 0.3); 
+  const force = shotDirection.multiplyScalar(chargePower * 0.45); 
   ball.velocity = force;
   lastMoveX = ball.position.x;
   lastMoveZ = ball.position.z;
@@ -124,7 +124,7 @@ function moveCameraToBall() {
   }
 }
 
-function inBounds(pointx, pointz){
+/*function inBounds(pointx, pointz){
   //console.log(pointx, pointz);
   if ((pointx > 3.3741 || pointx < .55069)){
     return 'x';
@@ -146,7 +146,36 @@ function inBounds(pointx, pointz){
       return 'x';
   }
   return 'n';
+}*/
+
+function collidesWithWall(ball) {
+  const ballBB = new THREE.Box3().setFromCenterAndSize(
+    ball.position.clone(),
+    new THREE.Vector3(0.03, 0.03, 0.03) 
+  );
+
+  for (let wall of wallMeshes) {
+    const wallBB = new THREE.Box3().setFromObject(wall);
+    if (ballBB.intersectsBox(wallBB)) {
+      const ballCenter = ballBB.getCenter(new THREE.Vector3());
+      const wallCenter = wallBB.getCenter(new THREE.Vector3());
+      const dx = ballCenter.x - wallCenter.x;
+      const dz = ballCenter.z - wallCenter.z;
+
+      const overlapX = (ballBB.max.x - ballBB.min.x) / 2 + (wallBB.max.x - wallBB.min.x) / 2 - Math.abs(dx);
+      const overlapZ = (ballBB.max.z - ballBB.min.z) / 2 + (wallBB.max.z - wallBB.min.z) / 2 - Math.abs(dz);
+
+      if (overlapX < overlapZ) {
+        return new THREE.Vector3(Math.sign(dx), 0, 0); 
+      } else {
+        return new THREE.Vector3(0, 0, Math.sign(dz)); 
+      }
+    }
+  }
+
+  return null;
 }
+
 
 function loadAndStartLevel(holeKey) {
   hole = holes[holeKey];
@@ -157,7 +186,8 @@ function loadAndStartLevel(holeKey) {
 
   // Clear scene except lights
   scene.children = scene.children.filter(child => child.type === 'AmbientLight' || child.type === 'DirectionalLight');
-  const { startPosition, bounds , holeLocation } = loadLevel(hole, scene);
+  const { startPosition, bounds , holeLocation , wallMeshes : levelWalls} = loadLevel(hole, scene);
+  wallMeshes = levelWalls;
   holeTarget = new THREE.Vector3(holeLocation.x, 0, holeLocation.z); 
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
@@ -218,7 +248,6 @@ function loadAndStartLevel(holeKey) {
 }
 function checkWin(ptX, ptZ){
   let dist = Math.sqrt((ptX-holeTarget.x)**2 + (ptZ-holeTarget.z)**2)
-  console.log(dist);
   if (dist < 0.08){
     return true;
   }
@@ -248,6 +277,9 @@ function animate() {
   const ballPos = ball.position;
   const pathVector = new THREE.Vector3().subVectors(ballPos, cameraPos);
   const pathLength = pathVector.length();
+
+  
+
   if (pathLength > 0.1) { 
     hazelnutTrees.forEach(tree => {
       const treePos = tree.getWorldPosition(new THREE.Vector3());
@@ -274,17 +306,16 @@ function animate() {
       ball.position.add(ball.velocity);
       ball.position.y = 0.07
       ball.velocity.multiplyScalar(0.97);
-      let char = inBounds(ball.position.x, ball.position.z);
-      if (char != 'n') {
-        // Reflect velocity: simple bounce
-        if (char == 'x'){
-          ball.velocity.x *= -0.8;
+      const normal = collidesWithWall(ball);
+      if (normal) {
+        const velocityDot = ball.velocity.dot(normal);
+        const reflected = ball.velocity.clone().sub(normal.multiplyScalar(2 * velocityDot)).multiplyScalar(0.8); // 0.8 bounce factor
+        ball.velocity.copy(reflected);
+        // handles jittering
+        if (reflected.length() < 0.01) {
+          reflected.set(0, 0, 0); 
         }
-        if (char == 'z'){
-          ball.velocity.z *= -0.8;
-        }
-        // Push the ball slightly back toward the valid area
-        const backstep = ball.velocity.clone().normalize().multiplyScalar(0.05);
+        const backstep = reflected.clone().normalize().multiplyScalar(0.08);
         ball.position.add(backstep);
       }
       if (ball.velocity.length() < 0.001) {
