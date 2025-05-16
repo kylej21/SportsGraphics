@@ -217,7 +217,7 @@ function loadAndStartLevel(holeKey) {
   splashVisible = true;
 }
 function checkWin(ptX, ptZ){
-  let dist = Math.sqrt((ptX-3)**2 + (ptZ-1)**2)
+  let dist = Math.sqrt((ptX-holeTarget.x)**2 + (ptZ-holeTarget.z)**2)
   console.log(dist);
   if (dist < 0.08){
     return true;
