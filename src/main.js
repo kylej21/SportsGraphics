@@ -24,6 +24,7 @@ let shotDirection = new THREE.Vector3();
 
 let lastMoveX = 3;
 let lastMoveZ = 3;
+let charge = 0;
 let isMoving = false;
 let isCharging = false;
 let chargeStartTime = 0;
@@ -67,6 +68,7 @@ function setupScene() {
         chargeStartTime = clock.getElapsedTime();
       }
     }
+    charge += 1;
   });
 
     document.addEventListener('keyup', (event) => {
@@ -75,9 +77,10 @@ function setupScene() {
       if(!isMoving){
         isCharging = false;
         chargeDuration = clock.getElapsedTime() - chargeStartTime;
-        fireBall(chargeDuration);
+        fireBall(charge);
         hasTakenFirstShot = true;
       }
+      charge = 0;
     }
   });
 
@@ -90,8 +93,8 @@ function setupScene() {
   scene.add(directionalLight);
 }
 function fireBall(chargeDuration) {
-  const maxChargeTime = 2; // Max time for full charge in seconds
-  const chargePower = Math.min(chargeDuration / maxChargeTime, 1); // Normalized power (0 to 1)
+  console.log("charge duration: ", chargeDuration);
+  const chargePower = Math.min(chargeDuration / 100, 1); // Normalized power (0 to 1)
 
   // Get camera's forward direction
   camera.getWorldDirection(shotDirection);
@@ -99,11 +102,11 @@ function fireBall(chargeDuration) {
   shotDirection.y = 0;
   shotDirection.normalize(); 
 
-  const force = shotDirection.multiplyScalar(chargePower * 0.3); 
+  const force = shotDirection.multiplyScalar(chargePower * 0.7); 
   ball.velocity = force;
   lastMoveX = ball.position.x;
   lastMoveZ = ball.position.z;
-  //console.log("Fired ball with charge power:", chargePower);
+  console.log("Fired ball with charge power:", chargePower);
 }
 //console.log(hole.pole.position.x, hole.pole.position.y, hole.pole.position.z);
 function moveCameraToBall() {
