@@ -29,7 +29,7 @@ let isCharging = false;
 let chargeStartTime = 0;
 let chargeDuration = 0;
 let hasTakenFirstShot = false;
-const holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
+let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 
 init();
 
@@ -157,8 +157,8 @@ function loadAndStartLevel(holeKey) {
 
   // Clear scene except lights
   scene.children = scene.children.filter(child => child.type === 'AmbientLight' || child.type === 'DirectionalLight');
-  const { startPosition, bounds } = loadLevel(hole, scene);
-
+  const { startPosition, bounds , holeLocation } = loadLevel(hole, scene);
+  holeTarget = new THREE.Vector3(holeLocation.x, 0, holeLocation.z); 
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
   domeCenter = new THREE.Vector3(bounds.width / 2 - 0.5, 0, bounds.height / 2 - 0.5);
@@ -294,7 +294,7 @@ function animate() {
           isMoving = false;
           if (checkWin(ball.position.x, ball.position.z)){
             const overlay = document.getElementById('splash-overlay');
-            overlay.style.display = 'block';  // Show splash screen
+            overlay.style.display = 'flex';  // Show splash screen
             splashVisible = true;
           }
           moveCameraToBall();  // << Move camera when ball stops
