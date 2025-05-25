@@ -112,8 +112,9 @@ function moveCameraToBall() {
     
     const cameraDistance = 1.5; // Distance behind the ball (adjust as needed)
     const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const newCameraPosition = ball.position.clone().add(offset);
 
-    camera.position.copy(ball.position).add(offset); 
+    camera.position.lerp(newCameraPosition, 0.03); 
     camera.position.y = 1.1; 
 
     //camera.lookAt(holeTarget);
@@ -269,7 +270,7 @@ function animate() {
   requestAnimationFrame(animate); 
   const elapsed = clock.getElapsedTime();
 
-  const speed = 0.08;
+  const speed = 0.04;
   const currentY = camera.position.y;
     hazelnutTrees.forEach(tree => tree.visible = true);
   
@@ -302,8 +303,11 @@ function animate() {
     if (ball && ball.velocity && Number.isFinite(ball.velocity.x) &&
         Number.isFinite(ball.velocity.y) &&
         Number.isFinite(ball.velocity.z)) {
-
+      
+      if( isMoving )
+        moveCameraToBall(); 
       ball.position.add(ball.velocity);
+      //camera.position.add(ball.velocity);
       ball.position.y = 0.07
       ball.velocity.multiplyScalar(0.97);
       const normal = collidesWithWall(ball);
@@ -328,7 +332,7 @@ function animate() {
             overlay.style.display = 'flex';  // Show splash screen
             splashVisible = true;
           }
-          moveCameraToBall();  // << Move camera when ball stops
+          //moveCameraToBall();  // << Move camera when ball stops
         }
       } else {
         isMoving = true;
