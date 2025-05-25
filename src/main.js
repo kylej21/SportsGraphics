@@ -376,7 +376,9 @@ function animate() {
       camera.position.copy(domeCenter).add(cameraToCenter);
       camera.position.y = currentY;
     }
+    console.log( camera.position.y );
     camera.position.y = Math.max(0.5, camera.position.y);
+    camera.position.y = Math.min(5, camera.position.y);
 
   scene.traverse((child) => {
      const mat = child.material;
