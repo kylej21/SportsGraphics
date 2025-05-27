@@ -122,10 +122,11 @@ function moveCameraToBall() {
       .normalize();
 
     const cameraDistance = 1.5; // Distance behind the ball (adjust as needed)
-    const offset = directionToHole.multiplyScalar(-cameraDistance);
+    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const newCameraPosition = ball.position.clone().add(offset);
 
-    camera.position.copy(ball.position).add(offset);
-    camera.position.y = 1.1;
+    camera.position.lerp(newCameraPosition, 0.03); 
+    camera.position.y = 1.1; 
 
     //camera.lookAt(holeTarget);
     if (controls) {
@@ -320,7 +321,7 @@ function animate() {
   requestAnimationFrame(animate);
   const elapsed = clock.getElapsedTime();
 
-  const speed = 0.08;
+  const speed = 0.04;
   const currentY = camera.position.y;
   hazelnutTrees.forEach((tree) => (tree.visible = true));
 
@@ -350,52 +351,50 @@ function animate() {
     });
   }
 
-  if (
-    ball &&
-    ball.velocity &&
-    Number.isFinite(ball.velocity.x) &&
-    Number.isFinite(ball.velocity.y) &&
-    Number.isFinite(ball.velocity.z)
-  ) {
-    ball.position.add(ball.velocity);
-    ball.position.y = 0.07;
-    ball.velocity.multiplyScalar(0.97);
-    const normal = collidesWithWall(ball);
-    if (normal) {
-      const velocityDot = ball.velocity.dot(normal);
-      const reflected = ball.velocity
-        .clone()
-        .sub(normal.multiplyScalar(2 * velocityDot))
-        .multiplyScalar(0.8); // 0.8 bounce factor
-      ball.velocity.copy(reflected);
-      // handles jittering
-      if (reflected.length() < 0.01) {
-        reflected.set(0, 0, 0);
-      }
-      const backstep = reflected.clone().normalize().multiplyScalar(0.08);
-      ball.position.add(backstep);
-    }
-    if (ball.velocity.length() < 0.001) {
-      ball.velocity.set(0, 0, 0);
-
-      if (isMoving) {
-        isMoving = false;
-        if (checkWin(ball.position.x, ball.position.z)) {
-          const overlay = document.getElementById("splash-overlay");
-          overlay.style.display = "flex"; // Show splash screen
-          splashVisible = true;
+    if (ball && ball.velocity && Number.isFinite(ball.velocity.x) &&
+        Number.isFinite(ball.velocity.y) &&
+        Number.isFinite(ball.velocity.z)) {
+      
+      if( isMoving )
+        moveCameraToBall(); 
+      ball.position.add(ball.velocity);
+      //camera.position.add(ball.velocity);
+      ball.position.y = 0.07
+      ball.velocity.multiplyScalar(0.97);
+      const normal = collidesWithWall(ball);
+      if (normal) {
+        const velocityDot = ball.velocity.dot(normal);
+        const reflected = ball.velocity.clone().sub(normal.multiplyScalar(2 * velocityDot)).multiplyScalar(0.8); // 0.8 bounce factor
+        ball.velocity.copy(reflected);
+        // handles jittering
+        if (reflected.length() < 0.01) {
+          reflected.set(0, 0, 0); 
         }
-        moveCameraToBall(); // << Move camera when ball stops
+        const backstep = reflected.clone().normalize().multiplyScalar(0.08);
+        ball.position.add(backstep);
       }
+      if (ball.velocity.length() < 0.001) {
+        ball.velocity.set(0, 0, 0);
+
+        if (isMoving) {
+          isMoving = false;
+          if (checkWin(ball.position.x, ball.position.z)){
+            const overlay = document.getElementById('splash-overlay');
+            overlay.style.display = 'flex';  // Show splash screen
+            splashVisible = true;
+          }
+          //moveCameraToBall();  // << Move camera when ball stops
+        }
+      } else {
+        isMoving = true;
+      }
+
     } else {
-      isMoving = true;
+      if (ball && ball.velocity) {
+        ball.velocity.set(0, 0, 0);
+        isMoving = false;
+      }
     }
-  } else {
-    if (ball && ball.velocity) {
-      ball.velocity.set(0, 0, 0);
-      isMoving = false;
-    }
-  }
 
   let movementDirection;
   if (keyStates.ArrowUp) {
@@ -428,14 +427,16 @@ function animate() {
   );
   const distanceToCenter = cameraToCenter.length();
 
-  //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
-  //console.log("OLD values", currentX, currentZ);
-  if (distanceToCenter > domeRadius) {
-    cameraToCenter.normalize().multiplyScalar(domeRadius);
-    camera.position.copy(domeCenter).add(cameraToCenter);
-    camera.position.y = currentY;
-  }
-  camera.position.y = Math.max(0.5, camera.position.y);
+    //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+    //console.log("OLD values", currentX, currentZ);
+    if( distanceToCenter > domeRadius ) {
+      cameraToCenter.normalize().multiplyScalar(domeRadius);
+      camera.position.copy(domeCenter).add(cameraToCenter);
+      camera.position.y = currentY;
+    }
+    console.log( camera.position.y );
+    camera.position.y = Math.max(0.5, camera.position.y);
+    camera.position.y = Math.min(5, camera.position.y);
 
   scene.traverse((child) => {
     const mat = child.material;
