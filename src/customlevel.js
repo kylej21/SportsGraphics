@@ -1,4 +1,3 @@
-// customlevel.js
 const gridSize = 5;
 const grid = [];
 
@@ -31,24 +30,80 @@ function createTileSelector() {
   return selector;
 }
 
-function createEditor(rows = gridSize, cols = gridSize) {
-  const existing = document.getElementById("editor-container");
-  if (existing) existing.remove();
+function createRulesPanel() {
+  const rules = document.createElement("div");
+  rules.id = "rules-panel";
 
-  let container = document.getElementById("editor-container");
-  if (container) {
-    container.innerHTML = ""; // Clear previous content
-  } else {
-    container = document.createElement("div");
-    container.id = "editor-container";
-    document.body.appendChild(container);
-  }
+  rules.innerHTML = `
+    <h2>Level Design Rules</h2>
+    <ul>
+      <li>Each level must have exactly one <strong>Start (S)</strong> and one <strong>Hole (X)</strong>.</li>
+      <li>Walls:
+        <ul>
+          <li><strong>L</strong> = Left</li>
+          <li><strong>R</strong> = Right</li>
+          <li><strong>T</strong> = Top</li>
+          <li><strong>B</strong> = Bottom</li>
+          <li>Combinations (e.g., <code>RB</code>, <code>LRTB</code>) are allowed.</li>
+        </ul>
+      </li>
+      <li>Any tile with a wall becomes <strong>tall grass</strong> instead of golf green.</li>
+      <li>Use <strong>C</strong> for corner decoration, and <strong>0</strong> for plain grass tiles.</li>
+    </ul>
+  `;
+  const backBtn = document.createElement("button");
+  backBtn.textContent = "Back to Menu";
+  backBtn.style.marginTop = "2rem";
+  backBtn.style.width = "250px";
+  backBtn.style.height = "50px";
+  backBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // prevent any accidental bubbling
+  e.preventDefault();
+
+  const splash = document.getElementById("splash-overlay");
+  if (splash) splash.style.display = "flex";
+
+  const editor = document.getElementById("editor-overlay");
+  if (editor) editor.remove();
+
+  // ✅ DON'T call any setupLevel or trigger game state here
+});
+
+  rules.appendChild(backBtn);
+  return rules;
+}
+
+function createEditor(rows = gridSize, cols = gridSize) {
+  const existingOverlay = document.getElementById("editor-overlay");
+  if (existingOverlay) existingOverlay.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "editor-overlay";
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.backdropFilter = "blur(3px)";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "9999";
+
+  const container = document.createElement("div");
+  container.id = "editor-container";
+
+  const columns = document.createElement("div");
+  columns.id = "editor-columns";
+
+  const rulesPanel = createRulesPanel();
+
+  const editorPanel = document.createElement("div");
+  editorPanel.id = "editor-panel";
+
+  const selector = createTileSelector();
+  editorPanel.appendChild(selector);
 
   const table = document.createElement("table");
   table.id = "level-editor";
-
-  const selector = createTileSelector();
-  container.appendChild(selector);
 
   for (let z = 0; z < rows; z++) {
     const row = document.createElement("tr");
@@ -68,33 +123,31 @@ function createEditor(rows = gridSize, cols = gridSize) {
     table.appendChild(row);
   }
 
-  container.appendChild(table);
+  editorPanel.appendChild(table);
 
   const playBtn = document.createElement("button");
   playBtn.textContent = "Play Custom Level";
   playBtn.setAttribute("data-level", "custom");
   playBtn.classList.add("level-btn");
+  playBtn.style.width = "250px";
+  playBtn.style.height = "50px";
   playBtn.addEventListener("click", () => {
-    window.customlevel = grid; // Set the global
-    const editor = document.getElementById("editor-container");
-    if (editor) editor.remove();
+    window.customlevel = grid;
+    overlay.remove();
   });
 
-  container.appendChild(playBtn);
+  editorPanel.appendChild(playBtn);
+
+  columns.appendChild(rulesPanel);
+  columns.appendChild(editorPanel);
+  container.appendChild(columns);
+  overlay.appendChild(container);
+  document.body.appendChild(overlay);
+
   window.setupLevelButtons?.();
 
-  // ✅ Hide splash so the editor is visible
   const splash = document.getElementById("splash-overlay");
   if (splash) splash.style.display = "none";
-
-  container.style.position = "absolute";
-  container.style.top = "20px";
-  container.style.left = "20px";
-  container.style.zIndex = "9999";
-  container.style.backgroundColor = "white";
-  container.style.padding = "10px";
-  container.style.border = "1px solid black";
-  document.body.appendChild(container);
 }
 
 window.initCustomLevelEditor = createEditor;

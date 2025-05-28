@@ -197,17 +197,23 @@ function collidesWithWall(ball) {
 function loadAndStartLevel(holeKey) {
   if (holeKey === "custom") {
     if (!window.customlevel) {
-      console.error("No custom level set.");
+      console.warn("No custom level set. Defaulting to hole1.");
+      holeKey = "hole1";
       return;
     }
-    hole = window.customlevel;
-  } else {
+    else{
+      hole = window.customlevel;
+    }
+    
+  } 
+  if (!hole) {
     hole = holes[holeKey];
     if (!hole) {
       console.error(`Hole '${holeKey}' not found.`);
       return;
     }
   }
+  
 
   // Clear scene except lights
   scene.children = scene.children.filter(
@@ -434,7 +440,6 @@ function animate() {
       camera.position.copy(domeCenter).add(cameraToCenter);
       camera.position.y = currentY;
     }
-    console.log( camera.position.y );
     camera.position.y = Math.max(0.5, camera.position.y);
     camera.position.y = Math.min(5, camera.position.y);
 

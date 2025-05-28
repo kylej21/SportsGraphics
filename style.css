@@ -227,3 +227,37 @@ button {
 #editor-container button:hover {
   background-color: #e84118;
 }
+
+#editor-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
+}
+
+#rules-panel {
+  flex: 1;
+  background-color: #f1f2f6;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: 2px solid #2f3542;
+  overflow-y: auto;
+  color: #2f3542;
+  font-size: 1rem;
+  max-width: 40%;
+}
+
+#rules-panel h2 {
+  color: #ff4757;
+  margin-top: 0;
+}
+
+#editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
