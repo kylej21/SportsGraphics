@@ -57,7 +57,7 @@ function createRulesPanel() {
   backBtn.style.width = "250px";
   backBtn.style.height = "50px";
   backBtn.addEventListener("click", (e) => {
-  e.stopPropagation(); // prevent any accidental bubbling
+  e.stopPropagation();
   e.preventDefault();
 
   const splash = document.getElementById("splash-overlay");
@@ -66,7 +66,7 @@ function createRulesPanel() {
   const editor = document.getElementById("editor-overlay");
   if (editor) editor.remove();
 
-  // ✅ DON'T call any setupLevel or trigger game state here
+  
 });
 
   rules.appendChild(backBtn);
