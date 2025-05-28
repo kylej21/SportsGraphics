@@ -1,7 +1,7 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 const textureLoader = new THREE.TextureLoader();
-const golfTexture = textureLoader.load('/golftext.avif'); 
+const golfTexture = textureLoader.load("/golftext.avif");
 golfTexture.wrapS = THREE.RepeatWrapping;
 golfTexture.wrapT = THREE.RepeatWrapping;
 golfTexture.repeat.set(1, 1);
@@ -18,6 +18,6 @@ export default class Ball {
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
 
-    return this.mesh; 
+    return this.mesh;
   }
 }

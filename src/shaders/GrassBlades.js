@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export default function GrassShaderMaterial(courseTileData, tileCount) {
   return new THREE.ShaderMaterial({
@@ -81,9 +81,9 @@ export default function GrassShaderMaterial(courseTileData, tileCount) {
       tileCount: { value: tileCount },
       lightDirection: { value: new THREE.Vector3(5, 10, 7.5).normalize() },
       ambientStrength: { value: 0.8 },
-      lightColor: { value: new THREE.Color(0xffffff) }
+      lightColor: { value: new THREE.Color(0xffffff) },
     },
     side: THREE.DoubleSide,
-    transparent: true
+    transparent: true,
   });
 }

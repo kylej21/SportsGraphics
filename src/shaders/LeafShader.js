@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export default function LeafSwayShader(leavesTexture, leavesAlpha) {
   return new THREE.ShaderMaterial({
@@ -7,8 +7,8 @@ export default function LeafSwayShader(leavesTexture, leavesAlpha) {
       map: { value: leavesTexture },
       alphaMap: { value: leavesAlpha },
       lightDirection: { value: new THREE.Vector3(5, 10, 7.5).normalize() },
-      ambientStrength: { value: 0.8 }, 
-      lightColor: { value: new THREE.Color(0xffffff) }
+      ambientStrength: { value: 0.8 },
+      lightColor: { value: new THREE.Color(0xffffff) },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -61,6 +61,6 @@ export default function LeafSwayShader(leavesTexture, leavesAlpha) {
       }
     `,
     transparent: true,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
 }

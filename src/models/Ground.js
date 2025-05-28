@@ -1,10 +1,10 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 const loader = new THREE.TextureLoader();
-const grassTexture = loader.load('/grassnew.jpg');
+const grassTexture = loader.load("/grassnew.jpg");
 grassTexture.wrapS = THREE.RepeatWrapping;
 grassTexture.wrapT = THREE.RepeatWrapping;
-grassTexture.repeat.set(2, 2); 
+grassTexture.repeat.set(2, 2);
 
 export default function Ground(position) {
   const geometry = new THREE.BoxGeometry(1, 0.05, 1);

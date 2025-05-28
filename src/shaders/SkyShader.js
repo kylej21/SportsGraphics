@@ -1,5 +1,5 @@
 // shaders/SkyDomeShader.js
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export default function SkyDomeShaderMaterial(silhouetteTexture) {
   silhouetteTexture.wrapS = THREE.RepeatWrapping;
@@ -45,9 +45,9 @@ export default function SkyDomeShaderMaterial(silhouetteTexture) {
       }
     `,
     uniforms: {
-      silhouetteTexture: { value: silhouetteTexture }
+      silhouetteTexture: { value: silhouetteTexture },
     },
     side: THREE.BackSide,
-    transparent: false
+    transparent: false,
   });
 }
