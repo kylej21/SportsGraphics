@@ -1,3 +1,5 @@
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
 const gridSize = 5;
 const grid = [];
 
@@ -57,7 +59,7 @@ function createRulesPanel() {
   backBtn.style.width = "250px";
   backBtn.style.height = "50px";
   backBtn.addEventListener("click", (e) => {
-  e.stopPropagation(); // prevent any accidental bubbling
+  e.stopPropagation();
   e.preventDefault();
 
   const splash = document.getElementById("splash-overlay");
@@ -66,7 +68,7 @@ function createRulesPanel() {
   const editor = document.getElementById("editor-overlay");
   if (editor) editor.remove();
 
-  // ✅ DON'T call any setupLevel or trigger game state here
+  
 });
 
   rules.appendChild(backBtn);
@@ -131,7 +133,27 @@ function createEditor(rows = gridSize, cols = gridSize) {
   playBtn.classList.add("level-btn");
   playBtn.style.width = "250px";
   playBtn.style.height = "50px";
-  playBtn.addEventListener("click", () => {
+  playBtn.addEventListener("click", (e) => {
+  const flatTiles = grid.flatMap((row, z) =>
+    row.map((value, x) => ({ type: value, x, z }))
+  );
+
+  const startCount = flatTiles.filter(t => t.type === "S").length;
+  const holeCount = flatTiles.filter(t => t.type === "X").length;
+
+  if (startCount !== 1 || holeCount < 1) {
+    e.preventDefault();
+    e.stopPropagation();
+    Toastify({
+      text: "Level must contain exactly one Start (S) and a Hole (X).",
+      duration: 3000,
+      gravity: "top",      // "top" or "bottom"
+      position: "right",   // "left", "center", or "right"
+      backgroundColor: "#ff4757", // Customize as needed
+      close: true,
+    }).showToast();    return;
+    }
+
     window.customlevel = grid;
     overlay.remove();
   });
