@@ -82,6 +82,8 @@ function setupScene() {
      if (event.key === " " && !isMoving) {
     isCharging = false;
     const chargeDuration = (performance.now() - chargeStartTime) / 1000;
+    if (ball.triggerSwing) ball.triggerSwing();
+
     fireBall(chargeDuration);
     hasTakenFirstShot = true;
   }
@@ -314,6 +316,8 @@ function loadAndStartLevel(holeKey) {
   }
   ball = new Ball(startPosition);
   scene.add(ball);
+  if (ball.addClubToScene) ball.addClubToScene(scene);
+
   controls = new OrbitControls(camera, renderer.domElement);
   if (ball !== undefined) {
     controls.target.copy(ball.position);
@@ -480,6 +484,9 @@ function animate() {
       child.material.uniforms.time.value = elapsed;
     }
   });
+
+if (ball.updateClub) ball.updateClub(camera, isMoving);
+
 
   if (!splashVisible) {
     controls.update();
