@@ -71,24 +71,20 @@ function setupScene() {
       );
       camera.lookAt(ball.position);
     }
-    if (event.key === " ") {
-      if (!isMoving) {
-        isCharging = true;
-        chargeStartTime = clock.getElapsedTime();
-      }
+    if (event.key === " " && !isMoving && !isCharging) {
+      isCharging = true;
+      chargeStartTime = performance.now();
     }
   });
 
   document.addEventListener("keyup", (event) => {
     keyStates[event.key] = false;
-    if (event.key === " ") {
-      if (!isMoving) {
-        isCharging = false;
-        chargeDuration = clock.getElapsedTime() - chargeStartTime;
-        fireBall(chargeDuration);
-        hasTakenFirstShot = true;
-      }
-    }
+     if (event.key === " " && !isMoving) {
+    isCharging = false;
+    const chargeDuration = (performance.now() - chargeStartTime) / 1000;
+    fireBall(chargeDuration);
+    hasTakenFirstShot = true;
+  }
   });
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -122,14 +118,20 @@ function setupScene() {
 }
 
 function fireBall(chargeDuration) {
+  console.log("charge duration",chargeDuration);
   const maxChargeTime = 2;
-  const chargePower = Math.min(chargeDuration / maxChargeTime, 1);
+  const clampedDuration = Math.min(chargeDuration, maxChargeTime);
+  const chargePower = Math.pow(clampedDuration / maxChargeTime, 1.25);
+
   camera.getWorldDirection(shotDirection);
   shotDirection.y = 0;
   shotDirection.normalize();
 
-  const force = shotDirection.multiplyScalar(chargePower * 0.45);
-  ball.velocity = force;
+  const baseForce = 0.15;
+  const force = shotDirection.multiplyScalar(chargePower * baseForce);
+  console.log("force", force)
+  ball.velocity = force.clone();
+
   lastMoveX = ball.position.x;
   lastMoveZ = ball.position.z;
 
@@ -392,7 +394,7 @@ function animate() {
       ball.position.add(ball.velocity);
       //camera.position.add(ball.velocity);
       ball.position.y = 0.07
-      ball.velocity.multiplyScalar(0.97);
+      ball.velocity.multiplyScalar(0.99);
       const normal = collidesWithWall(ball);
       if (normal) {
         const velocityDot = ball.velocity.dot(normal);
