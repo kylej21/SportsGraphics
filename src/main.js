@@ -357,9 +357,11 @@ function loadAndStartLevel(holeKey) {
   // Keep overlay visible until user selects a level
   splashVisible = true;
 }
-function checkWin(ptX, ptZ) {
-  let dist = Math.sqrt((ptX - holeTarget.x) ** 2 + (ptZ - holeTarget.z) ** 2);
-  if (dist < 0.08) {
+function checkWin(ptX, ptZ, ballY = 0.07) {
+  const holeRadius = 0.08;
+  const dist = Math.sqrt((ptX - holeTarget.x) ** 2 + (ptZ - holeTarget.z) ** 2);
+  
+  if (dist < holeRadius && ballY < 0.06) {
     return true;
   }
   return false;
@@ -375,7 +377,11 @@ function setupLevelButtons() {
     });
   });
 }
-
+function isOverHole(ballPos) {
+  const holeRadius = 0.08;
+  const dist = Math.sqrt((ballPos.x - holeTarget.x) ** 2 + (ballPos.z - holeTarget.z) ** 2);
+  return dist < holeRadius;
+}
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = clock.getElapsedTime();
@@ -418,35 +424,75 @@ function animate() {
         Number.isFinite(ball.velocity.y) &&
         Number.isFinite(ball.velocity.z)) {
       
-      if( isMoving )
+      if (isMoving) {
         moveCameraToBall(); 
+      }
+      
       ball.position.add(ball.velocity);
-      //camera.position.add(ball.velocity);
-      ball.position.y = 0.07
-      ball.velocity.multiplyScalar(0.99);
+      
+      const overHole = isOverHole(ball.position);
+      
+      if (overHole) {
+        const holeDepth = 0.05;
+        const fallRate = 0.005;
+        
+        if (ball.position.y > (0.07 - holeDepth)) {
+          ball.position.y -= fallRate;
+          ball.velocity.multiplyScalar(0.95);
+          
+          const holeDirection = new THREE.Vector3()
+            .subVectors(holeTarget, ball.position)
+            .normalize()
+            .multiplyScalar(0.002);
+          ball.velocity.add(holeDirection);
+        } else {
+          ball.position.y = 0.07 - holeDepth;
+          ball.velocity.set(0, 0, 0);
+          isMoving = false;
+          
+          if (checkWin(ball.position.x, ball.position.z, ball.position.y)) {
+            setTimeout(() => {
+              const overlay = document.getElementById('splash-overlay');
+              overlay.style.display = 'flex';
+              splashVisible = true;
+            }, 500); 
+            return;
+          }
+        }
+      } else {
+        // Ball is not over hole - normal ground physics
+        ball.position.y = 0.07; // Keep ball at ground level
+        ball.velocity.multiplyScalar(0.99); // Normal friction
+      }
+      
+      // Wall collision detection (unchanged)
       const normal = collidesWithWall(ball);
       if (normal) {
         const velocityDot = ball.velocity.dot(normal);
-        const reflected = ball.velocity.clone().sub(normal.multiplyScalar(2 * velocityDot)).multiplyScalar(0.8); // 0.8 bounce factor
+        const reflected = ball.velocity.clone().sub(normal.multiplyScalar(2 * velocityDot)).multiplyScalar(0.8);
         ball.velocity.copy(reflected);
-        // handles jittering
+        
         if (reflected.length() < 0.01) {
           reflected.set(0, 0, 0); 
         }
         const backstep = reflected.clone().normalize().multiplyScalar(0.08);
         ball.position.add(backstep);
       }
+      
+      // Check if ball has stopped moving
       if (ball.velocity.length() < 0.001) {
         ball.velocity.set(0, 0, 0);
-
+        
         if (isMoving) {
           isMoving = false;
-          if (checkWin(ball.position.x, ball.position.z)){
-            const overlay = document.getElementById('splash-overlay');
-            overlay.style.display = 'flex';  // Show splash screen
-            splashVisible = true;
+          // Only check win if ball is actually in the hole (not just stopped near it)
+          if (overHole && ball.position.y < 0.05) {
+            if (checkWin(ball.position.x, ball.position.z, ball.position.y)) {
+              const overlay = document.getElementById('splash-overlay');
+              overlay.style.display = 'flex';
+              splashVisible = true;
+            }
           }
-          //moveCameraToBall();  // << Move camera when ball stops
         }
       } else {
         isMoving = true;
