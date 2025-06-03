@@ -5,6 +5,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import holes from "./holes/index.js";
 import { loadLevel } from "./levelparser.js";
 import Ball from "./models/Ball.js";
+import Arrow from "./models/Arrow.js";
 import {
   generateHazelnuts,
   addGroundPlane,
@@ -36,11 +37,13 @@ let chargeDuration = 0;
 let hasTakenFirstShot = false;
 let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 let wallMeshes = [];
+let chargingArrow = null;
 
 init();
 
 function init() {
   setupScene();
+  chargingArrow = new Arrow();
   loadAndStartLevel("hole1");
   setupLevelButtons();
   animate();
@@ -84,6 +87,9 @@ function setupScene() {
     const chargeDuration = (performance.now() - chargeStartTime) / 1000;
     fireBall(chargeDuration);
     hasTakenFirstShot = true;
+    if (chargingArrow) {
+      chargingArrow.hide();
+    }
   }
   });
 
@@ -204,7 +210,7 @@ function collidesWithWall(ball) {
         (wallBB.max.x - wallBB.min.x) / 2 -
         Math.abs(dx);
       const overlapZ =
-        (ballBB.max.z - ballBB.min.z) / 2 +
+        (ballBB.max.z - wallBB.min.z) / 2 +
         (wallBB.max.z - wallBB.min.z) / 2 -
         Math.abs(dz);
 
@@ -314,6 +320,11 @@ function loadAndStartLevel(holeKey) {
   }
   ball = new Ball(startPosition);
   scene.add(ball);
+  
+  if (chargingArrow) {
+    chargingArrow.addToScene(scene);
+  }
+  
   controls = new OrbitControls(camera, renderer.domElement);
   if (ball !== undefined) {
     controls.target.copy(ball.position);
@@ -354,6 +365,10 @@ function setupLevelButtons() {
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = clock.getElapsedTime();
+
+  if (chargingArrow) {
+    chargingArrow.update(isCharging, ball, camera, chargeStartTime);
+  }
 
   const speed = 0.04;
   const currentY = camera.position.y;
