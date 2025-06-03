@@ -39,6 +39,8 @@ let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 let wallMeshes = [];
 let chargingArrow = null;
 
+let hitSound;
+
 init();
 
 function init() {
@@ -63,6 +65,16 @@ function setupScene() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
+
+  const listener = new THREE.AudioListener();
+  camera.add(listener);
+
+  hitSound = new THREE.Audio(listener);
+  const audioLoader = new THREE.AudioLoader();
+  audioLoader.load("/sounds/hit.mp3", (buffer) => {
+    hitSound.setBuffer(buffer);
+    hitSound.setVolume(0.5);
+  });
 
   document.addEventListener("keydown", (event) => {
     keyStates[event.key] = true;
@@ -132,6 +144,8 @@ function fireBall(chargeDuration) {
   camera.getWorldDirection(shotDirection);
   shotDirection.y = 0;
   shotDirection.normalize();
+
+  hitSound.play();
 
   const baseForce = 0.15;
   const force = shotDirection.multiplyScalar(chargePower * baseForce);
