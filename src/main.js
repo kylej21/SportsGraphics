@@ -62,7 +62,7 @@ function setupScene() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    10,
+    1000,
   );
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -411,6 +411,8 @@ function loadAndStartLevel(holeKey) {
   }
   
   controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = false;
+
   if (ball !== undefined) {
     controls.target.copy(ball.position);
   }
@@ -507,8 +509,15 @@ function animate() {
         ball.position.set(startX, 0.07, startZ);
         panToStart();
       }
-      if( isMoving )
+      if( isMoving ) {
         moveCameraToBall(); 
+        controls.enabled = false;
+        controls.update();
+      }
+      else {
+        controls.enabled = true;
+        controls.update();
+      }
       ball.position.add(ball.velocity);
       //camera.position.add(ball.velocity);
       ball.position.y = 0.07
@@ -599,7 +608,15 @@ function animate() {
   });
 
   if (!splashVisible) {
-    controls.update();
+    if( isMoving ) {
+      controls.enabled = false;
+      controls.target.copy(ball.position);
+      controls.update();
+    }
+    else{
+      controls.enabled = true;
+      controls.update();
+    }
   }
   renderer.render(scene, camera);
 }
