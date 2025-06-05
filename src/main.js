@@ -42,7 +42,9 @@ let startX, startZ, boundX, boundZ;
 let outOfBounds = false;
 let tiles;
 
-let hitSound;
+let hitSound, finishSound;
+
+let levelComplete = false;
 
 init();
 
@@ -77,6 +79,12 @@ function setupScene() {
   audioLoader.load("/sounds/hit.mp3", (buffer) => {
     hitSound.setBuffer(buffer);
     hitSound.setVolume(0.5);
+  });
+
+  finishSound = new THREE.Audio(listener);
+  audioLoader.load("/sounds/holedone.mp3", (buffer) => {
+    finishSound.setBuffer(buffer);
+    finishSound.setVolume(0.5);
   });
 
   document.addEventListener("keydown", (event) => {
@@ -255,6 +263,7 @@ function collidesWithWall(ball) {
 }
 
 function loadAndStartLevel(holeKey) {
+  levelComplete = false;
   window.strokes = 0;
   const counter = document.getElementById("stroke-counter");
   if (counter) counter.textContent = "Par: 0";
@@ -546,11 +555,14 @@ function animate() {
           ball.velocity.set(0, 0, 0);
           isMoving = false;
           
-          if (checkWin(ball.position.x, ball.position.z, ball.position.y)) {
+          if (!levelComplete && checkWin(ball.position.x, ball.position.z, ball.position.y)) {
+            finishSound.play();
+            levelComplete = true;
             setTimeout(() => {
               const overlay = document.getElementById('splash-overlay');
               overlay.style.display = 'flex';
               splashVisible = true;
+
             }, 500); 
             return;
           }
