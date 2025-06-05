@@ -62,7 +62,7 @@ function setupScene() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000,
+    10,
   );
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -289,7 +289,58 @@ function loadAndStartLevel(holeKey) {
     holeLocation,
     wallMeshes: levelWalls,
   } = loadLevel(hole, scene);
-  wallMeshes = levelWalls;
+    wallMeshes = levelWalls;
+
+    // For each wall, nudge its vertices along the proper axis so overlapping faces no longer share depth ──
+  const EPSILON = 0.005; 
+
+  wallMeshes.forEach((wall) => {
+    if (!wall.geometry) return;
+
+    wall.updateMatrixWorld();
+    const box = new THREE.Box3().setFromObject(wall);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    let faceNormal = new THREE.Vector3();
+    if (size.x > size.z) {
+      faceNormal.set(0, 0, 1);
+    } else {
+      faceNormal.set(1, 0, 0);
+    }
+
+    const geom = wall.geometry.clone();
+
+    if (!geom.attributes.normal) {
+      geom.computeVertexNormals();
+    }
+
+    const posAttr = geom.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const vx = posAttr.getX(i),
+        vy = posAttr.getY(i),
+        vz = posAttr.getZ(i);
+
+      posAttr.setXYZ(
+        i,
+        vx + faceNormal.x * EPSILON,
+        vy + faceNormal.y * EPSILON,
+        vz + faceNormal.z * EPSILON
+      );
+    }
+    posAttr.needsUpdate = true;
+
+    wall.geometry = geom;
+
+    if (wall.material) {
+      wall.material = wall.material.clone();
+      wall.material.polygonOffset = true;
+      wall.material.polygonOffsetFactor = 1;
+      wall.material.polygonOffsetUnits = 1;
+      wall.material.needsUpdate = true;
+    }
+  });
+
   holeTarget = new THREE.Vector3(holeLocation.x, 0, holeLocation.z);
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
