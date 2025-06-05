@@ -38,6 +38,9 @@ let hasTakenFirstShot = false;
 let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 let wallMeshes = [];
 let chargingArrow = null;
+let startX, startZ, boundX, boundZ;
+let outOfBounds = false;
+let tiles;
 
 let hitSound;
 
@@ -79,12 +82,7 @@ function setupScene() {
   document.addEventListener("keydown", (event) => {
     keyStates[event.key] = true;
     if (event.key === "r") {
-      camera.position.set(
-        ball.position.x + 1,
-        ball.position.y + 1,
-        ball.position.z,
-      );
-      camera.lookAt(ball.position);
+      panToStart();
     }
     if (event.key === " " && !isMoving && !isCharging) {
       isCharging = true;
@@ -136,6 +134,7 @@ function setupScene() {
 }
 
 function fireBall(chargeDuration) {
+    hitSound.play();
   console.log("charge duration",chargeDuration);
   const maxChargeTime = 2;
   const clampedDuration = Math.min(chargeDuration, maxChargeTime);
@@ -145,7 +144,6 @@ function fireBall(chargeDuration) {
   shotDirection.y = 0;
   shotDirection.normalize();
 
-  hitSound.play();
 
   const baseForce = 0.15;
   const force = shotDirection.multiplyScalar(chargePower * baseForce);
@@ -174,10 +172,27 @@ function moveCameraToBall() {
     camera.position.y = 1.1; 
 
     //camera.lookAt(holeTarget);
-    if (controls) {
       controls.target.copy(ball.position);
       controls.update();
-    }
+  }
+}
+
+function panToStart() {
+  if (ball) {
+    const directionToHole = new THREE.Vector3()
+      .subVectors(holeTarget, ball.position)
+      .normalize();
+
+    const cameraDistance = 1.5; 
+    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const newCameraPosition = ball.position.clone().add(offset);
+
+    camera.position.copy(newCameraPosition);
+    camera.position.y = ball.position.y + 1.1; // Adjust height to be above the ball
+
+    //camera.lookAt(holeTarget);
+      controls.target.copy(ball.position);
+      controls.update();
   }
 }
 
@@ -284,6 +299,9 @@ function loadAndStartLevel(holeKey) {
     bounds.height / 2 - 0.5,
   );
   const tileCount = courseTileArray.length / 2;
+  tiles = courseTileArray;
+  boundX = bounds.width;
+  boundZ = bounds.height;
 
   camera.position.set(3, 3, 3);
   camera.lookAt(bounds.width / 2, 0, bounds.width / 2);
@@ -332,6 +350,8 @@ function loadAndStartLevel(holeKey) {
     console.error("No start position found in level data");
     return;
   }
+  startX = startPosition.x;
+  startZ = startPosition.z;
   ball = new Ball(startPosition);
   scene.add(ball);
   
@@ -346,12 +366,7 @@ function loadAndStartLevel(holeKey) {
   controls.enableDamping = true;
   controls.saveState();
 
-  camera.position.set(
-    ball.position.x + 1,
-    ball.position.y + 1,
-    ball.position.z,
-  );
-  camera.lookAt(ball.position);
+  panToStart();
 
   const overlay = document.getElementById("splash-overlay");
   // Keep overlay visible until user selects a level
@@ -374,6 +389,20 @@ function setupLevelButtons() {
       splashVisible = false;
     });
   });
+}
+
+function isOutofBounds( x, z ) {
+  const halfSize = 0.55;
+  for( let i = 0; i < tiles.length; i += 2 ) {
+    const tileX = tiles[i];
+    const tileZ = tiles[i + 1];
+    const dx = Math.abs( x - tileX );
+    const dz = Math.abs( z - tileZ );
+    if( dx < halfSize && dz < halfSize ) {
+      return false; 
+    }
+  }
+  return true;
 }
 
 function animate() {
@@ -418,6 +447,15 @@ function animate() {
         Number.isFinite(ball.velocity.y) &&
         Number.isFinite(ball.velocity.z)) {
       
+      console.log( "x:", ball.position.x, "z:", ball.position.z);
+      //if( ball.position.x < -0.5 || ball.position.x > 4.5 || ball.position.z < -0.5 || ball.position.z > 4.5 ) {
+      if( isOutofBounds(ball.position.x, ball.position.z) ) {
+        console.log( "Ball out of bounds (", ball.position.x, ",", ball.position.z, "), resetting position");
+        ball.velocity.set(0, 0, 0);
+        isMoving = false;
+        ball.position.set(startX, 0.07, startZ);
+        panToStart();
+      }
       if( isMoving )
         moveCameraToBall(); 
       ball.position.add(ball.velocity);
@@ -458,7 +496,6 @@ function animate() {
         isMoving = false;
       }
     }
-
   let movementDirection;
   if (keyStates.ArrowUp) {
     //console.log(camera.position.x, camera.position.z);
