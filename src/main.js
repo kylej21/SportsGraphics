@@ -38,6 +38,9 @@ let hasTakenFirstShot = false;
 let holeTarget = new THREE.Vector3(3.0427, 0.07, 1.01);
 let wallMeshes = [];
 let chargingArrow = null;
+let startX, startZ, boundX, boundZ;
+let outOfBounds = false;
+let tiles;
 
 let hitSound;
 
@@ -79,12 +82,7 @@ function setupScene() {
   document.addEventListener("keydown", (event) => {
     keyStates[event.key] = true;
     if (event.key === "r") {
-      camera.position.set(
-        ball.position.x + 1,
-        ball.position.y + 1,
-        ball.position.z,
-      );
-      camera.lookAt(ball.position);
+      panToStart();
     }
     if (event.key === " " && !isMoving && !isCharging) {
       isCharging = true;
@@ -136,6 +134,7 @@ function setupScene() {
 }
 
 function fireBall(chargeDuration) {
+    hitSound.play();
   console.log("charge duration",chargeDuration);
   const maxChargeTime = 2;
   const clampedDuration = Math.min(chargeDuration, maxChargeTime);
@@ -145,7 +144,6 @@ function fireBall(chargeDuration) {
   shotDirection.y = 0;
   shotDirection.normalize();
 
-  hitSound.play();
 
   const baseForce = 0.15;
   const force = shotDirection.multiplyScalar(chargePower * baseForce);
@@ -174,10 +172,27 @@ function moveCameraToBall() {
     camera.position.y = 1.1; 
 
     //camera.lookAt(holeTarget);
-    if (controls) {
       controls.target.copy(ball.position);
       controls.update();
-    }
+  }
+}
+
+function panToStart() {
+  if (ball) {
+    const directionToHole = new THREE.Vector3()
+      .subVectors(holeTarget, ball.position)
+      .normalize();
+
+    const cameraDistance = 1.5; 
+    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const newCameraPosition = ball.position.clone().add(offset);
+
+    camera.position.copy(newCameraPosition);
+    camera.position.y = ball.position.y + 1.1; // Adjust height to be above the ball
+
+    //camera.lookAt(holeTarget);
+      controls.target.copy(ball.position);
+      controls.update();
   }
 }
 
@@ -274,7 +289,58 @@ function loadAndStartLevel(holeKey) {
     holeLocation,
     wallMeshes: levelWalls,
   } = loadLevel(hole, scene);
-  wallMeshes = levelWalls;
+    wallMeshes = levelWalls;
+
+    // For each wall, nudge its vertices along the proper axis so overlapping faces no longer share depth ──
+  const EPSILON = 0.005; 
+
+  wallMeshes.forEach((wall) => {
+    if (!wall.geometry) return;
+
+    wall.updateMatrixWorld();
+    const box = new THREE.Box3().setFromObject(wall);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    let faceNormal = new THREE.Vector3();
+    if (size.x > size.z) {
+      faceNormal.set(0, 0, 1);
+    } else {
+      faceNormal.set(1, 0, 0);
+    }
+
+    const geom = wall.geometry.clone();
+
+    if (!geom.attributes.normal) {
+      geom.computeVertexNormals();
+    }
+
+    const posAttr = geom.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const vx = posAttr.getX(i),
+        vy = posAttr.getY(i),
+        vz = posAttr.getZ(i);
+
+      posAttr.setXYZ(
+        i,
+        vx + faceNormal.x * EPSILON,
+        vy + faceNormal.y * EPSILON,
+        vz + faceNormal.z * EPSILON
+      );
+    }
+    posAttr.needsUpdate = true;
+
+    wall.geometry = geom;
+
+    if (wall.material) {
+      wall.material = wall.material.clone();
+      wall.material.polygonOffset = true;
+      wall.material.polygonOffsetFactor = 1;
+      wall.material.polygonOffsetUnits = 1;
+      wall.material.needsUpdate = true;
+    }
+  });
+
   holeTarget = new THREE.Vector3(holeLocation.x, 0, holeLocation.z);
   const courseTileArray = getCourseTileCenters(hole);
   domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
@@ -284,6 +350,9 @@ function loadAndStartLevel(holeKey) {
     bounds.height / 2 - 0.5,
   );
   const tileCount = courseTileArray.length / 2;
+  tiles = courseTileArray;
+  boundX = bounds.width;
+  boundZ = bounds.height;
 
   camera.position.set(3, 3, 3);
   camera.lookAt(bounds.width / 2, 0, bounds.width / 2);
@@ -332,6 +401,8 @@ function loadAndStartLevel(holeKey) {
     console.error("No start position found in level data");
     return;
   }
+  startX = startPosition.x;
+  startZ = startPosition.z;
   ball = new Ball(startPosition);
   scene.add(ball);
   
@@ -340,18 +411,15 @@ function loadAndStartLevel(holeKey) {
   }
   
   controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = false;
+
   if (ball !== undefined) {
     controls.target.copy(ball.position);
   }
   controls.enableDamping = true;
   controls.saveState();
 
-  camera.position.set(
-    ball.position.x + 1,
-    ball.position.y + 1,
-    ball.position.z,
-  );
-  camera.lookAt(ball.position);
+  panToStart();
 
   const overlay = document.getElementById("splash-overlay");
   // Keep overlay visible until user selects a level
@@ -382,6 +450,20 @@ function isOverHole(ballPos) {
   const dist = Math.sqrt((ballPos.x - holeTarget.x) ** 2 + (ballPos.z - holeTarget.z) ** 2);
   return dist < holeRadius;
 }
+function isOutofBounds( x, z ) {
+  const halfSize = 0.55;
+  for( let i = 0; i < tiles.length; i += 2 ) {
+    const tileX = tiles[i];
+    const tileZ = tiles[i + 1];
+    const dx = Math.abs( x - tileX );
+    const dz = Math.abs( z - tileZ );
+    if( dx < halfSize && dz < halfSize ) {
+      return false; 
+    }
+  }
+  return true;
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = clock.getElapsedTime();
@@ -424,10 +506,24 @@ function animate() {
         Number.isFinite(ball.velocity.y) &&
         Number.isFinite(ball.velocity.z)) {
       
-      if (isMoving) {
-        moveCameraToBall(); 
+      console.log( "x:", ball.position.x, "z:", ball.position.z);
+      //if( ball.position.x < -0.5 || ball.position.x > 4.5 || ball.position.z < -0.5 || ball.position.z > 4.5 ) {
+      if( isOutofBounds(ball.position.x, ball.position.z) ) {
+        console.log( "Ball out of bounds (", ball.position.x, ",", ball.position.z, "), resetting position");
+        ball.velocity.set(0, 0, 0);
+        isMoving = false;
+        ball.position.set(startX, 0.07, startZ);
+        panToStart();
       }
-      
+      if( isMoving ) {
+        moveCameraToBall(); 
+        controls.enabled = false;
+        controls.update();
+      }
+      else {
+        controls.enabled = true;
+        controls.update();
+      }
       ball.position.add(ball.velocity);
       
       const overHole = isOverHole(ball.position);
@@ -504,7 +600,6 @@ function animate() {
         isMoving = false;
       }
     }
-
   let movementDirection;
   if (keyStates.ArrowUp) {
     //console.log(camera.position.x, camera.position.z);
@@ -557,7 +652,15 @@ function animate() {
   });
 
   if (!splashVisible) {
-    controls.update();
+    if( isMoving ) {
+      controls.enabled = false;
+      controls.target.copy(ball.position);
+      controls.update();
+    }
+    else{
+      controls.enabled = true;
+      controls.update();
+    }
   }
   renderer.render(scene, camera);
 }
