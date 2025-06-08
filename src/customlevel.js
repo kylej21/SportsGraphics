@@ -1,5 +1,8 @@
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
+
+// can consider later making gridSize dynamic, but for the scope of this project,
+// keep constant.
 const gridSize = 5;
 const grid = [];
 
@@ -147,9 +150,9 @@ function createEditor(rows = gridSize, cols = gridSize) {
     Toastify({
       text: "Level must contain exactly one Start (S) and a Hole (X).",
       duration: 3000,
-      gravity: "top",      // "top" or "bottom"
-      position: "right",   // "left", "center", or "right"
-      backgroundColor: "#ff4757", // Customize as needed
+      gravity: "top",
+      position: "right", 
+      backgroundColor: "#ff4757",
       close: true,
     }).showToast();    return;
     }

@@ -15,6 +15,12 @@ export default function GrassShaderMaterial(courseTileData, tileCount) {
         vUv = uv;
 
         vec4 mvPosition = vec4(position, 1.0);
+        
+        // Note: This ifdef is required according to the docs online.
+        // when using an InstancedMesh, we must multiply by the instance matrix
+        // to not repeat locations of the grass blades
+        // see models/RoughField.js to view how this is instantiated
+
         #ifdef USE_INSTANCING
           mvPosition = instanceMatrix * mvPosition;
         #endif
