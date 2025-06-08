@@ -100,15 +100,15 @@ function setupScene() {
 
   document.addEventListener("keyup", (event) => {
     keyStates[event.key] = false;
-     if (event.key === " " && !isMoving) {
-    isCharging = false;
-    const chargeDuration = (performance.now() - chargeStartTime) / 1000;
-    fireBall(chargeDuration);
-    hasTakenFirstShot = true;
-    if (chargingArrow) {
-      chargingArrow.hide();
+    if (event.key === " " && !isMoving) {
+      isCharging = false;
+      const chargeDuration = (performance.now() - chargeStartTime) / 1000;
+      fireBall(chargeDuration);
+      hasTakenFirstShot = true;
+      if (chargingArrow) {
+        chargingArrow.hide();
+      }
     }
-  }
   });
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -142,8 +142,8 @@ function setupScene() {
 }
 
 function fireBall(chargeDuration) {
-    hitSound.play();
-  console.log("charge duration",chargeDuration);
+  hitSound.play();
+  console.log("charge duration", chargeDuration);
   const maxChargeTime = 2;
   const clampedDuration = Math.min(chargeDuration, maxChargeTime);
   const chargePower = Math.pow(clampedDuration / maxChargeTime, 1.25);
@@ -152,10 +152,9 @@ function fireBall(chargeDuration) {
   shotDirection.y = 0;
   shotDirection.normalize();
 
-
   const baseForce = 0.15;
   const force = shotDirection.multiplyScalar(chargePower * baseForce);
-  console.log("force", force)
+  console.log("force", force);
   ball.velocity = force.clone();
 
   lastMoveX = ball.position.x;
@@ -172,16 +171,16 @@ function moveCameraToBall() {
       .subVectors(holeTarget, ball.position)
       .normalize();
 
-    const cameraDistance = 1.5; 
-    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const cameraDistance = 1.5;
+    const offset = directionToHole.multiplyScalar(-cameraDistance);
     const newCameraPosition = ball.position.clone().add(offset);
 
-    camera.position.lerp(newCameraPosition, 0.03); 
-    camera.position.y = 1.1; 
+    camera.position.lerp(newCameraPosition, 0.03);
+    camera.position.y = 1.1;
 
     //camera.lookAt(holeTarget);
-      controls.target.copy(ball.position);
-      controls.update();
+    controls.target.copy(ball.position);
+    controls.update();
   }
 }
 
@@ -191,16 +190,16 @@ function panToStart() {
       .subVectors(holeTarget, ball.position)
       .normalize();
 
-    const cameraDistance = 1.5; 
-    const offset = directionToHole.multiplyScalar(-cameraDistance); 
+    const cameraDistance = 1.5;
+    const offset = directionToHole.multiplyScalar(-cameraDistance);
     const newCameraPosition = ball.position.clone().add(offset);
 
     camera.position.copy(newCameraPosition);
     camera.position.y = ball.position.y + 1.1; // Adjust height to be above the ball
 
     //camera.lookAt(holeTarget);
-      controls.target.copy(ball.position);
-      controls.update();
+    controls.target.copy(ball.position);
+    controls.update();
   }
 }
 
@@ -273,20 +272,16 @@ function loadAndStartLevel(holeKey) {
       console.warn("No custom level set. Defaulting to hole1.");
       holeKey = "hole1";
       return;
-    }
-    else{
+    } else {
       hole = window.customlevel;
     }
-    
-  } 
-  else{    
+  } else {
     hole = holes[holeKey];
     if (!hole) {
       console.error(`Hole '${holeKey}' not found.`);
       return;
     }
   }
-  
 
   // Clear scene except lights
   scene.children = scene.children.filter(
@@ -299,10 +294,10 @@ function loadAndStartLevel(holeKey) {
     holeLocation,
     wallMeshes: levelWalls,
   } = loadLevel(hole, scene);
-    wallMeshes = levelWalls;
+  wallMeshes = levelWalls;
 
-    // For each wall, nudge its vertices along the proper axis so overlapping faces no longer share depth ──
-  const EPSILON = 0.005; 
+  // For each wall, nudge its vertices along the proper axis so overlapping faces no longer share depth ──
+  const EPSILON = 0.005;
 
   wallMeshes.forEach((wall) => {
     if (!wall.geometry) return;
@@ -335,7 +330,7 @@ function loadAndStartLevel(holeKey) {
         i,
         vx + faceNormal.x * EPSILON,
         vy + faceNormal.y * EPSILON,
-        vz + faceNormal.z * EPSILON
+        vz + faceNormal.z * EPSILON,
       );
     }
     posAttr.needsUpdate = true;
@@ -415,11 +410,11 @@ function loadAndStartLevel(holeKey) {
   startZ = startPosition.z;
   ball = new Ball(startPosition);
   scene.add(ball);
-  
+
   if (chargingArrow) {
     chargingArrow.addToScene(scene);
   }
-  
+
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableZoom = false;
 
@@ -438,7 +433,7 @@ function loadAndStartLevel(holeKey) {
 function checkWin(ptX, ptZ, ballY = 0.07) {
   const holeRadius = 0.08;
   const dist = Math.sqrt((ptX - holeTarget.x) ** 2 + (ptZ - holeTarget.z) ** 2);
-  
+
   if (dist < holeRadius && ballY < 0.06) {
     return true;
   }
@@ -457,18 +452,20 @@ function setupLevelButtons() {
 }
 function isOverHole(ballPos) {
   const holeRadius = 0.08;
-  const dist = Math.sqrt((ballPos.x - holeTarget.x) ** 2 + (ballPos.z - holeTarget.z) ** 2);
+  const dist = Math.sqrt(
+    (ballPos.x - holeTarget.x) ** 2 + (ballPos.z - holeTarget.z) ** 2,
+  );
   return dist < holeRadius;
 }
-function isOutofBounds( x, z ) {
+function isOutofBounds(x, z) {
   const halfSize = 0.55;
-  for( let i = 0; i < tiles.length; i += 2 ) {
+  for (let i = 0; i < tiles.length; i += 2) {
     const tileX = tiles[i];
     const tileZ = tiles[i + 1];
-    const dx = Math.abs( x - tileX );
-    const dz = Math.abs( z - tileZ );
-    if( dx < halfSize && dz < halfSize ) {
-      return false; 
+    const dx = Math.abs(x - tileX);
+    const dz = Math.abs(z - tileZ);
+    if (dx < halfSize && dz < halfSize) {
+      return false;
     }
   }
   return true;
@@ -512,107 +509,119 @@ function animate() {
     });
   }
 
-    if (ball && ball.velocity && Number.isFinite(ball.velocity.x) &&
-        Number.isFinite(ball.velocity.y) &&
-        Number.isFinite(ball.velocity.z)) {
-      
-      console.log( "x:", ball.position.x, "z:", ball.position.z);
-      //if( ball.position.x < -0.5 || ball.position.x > 4.5 || ball.position.z < -0.5 || ball.position.z > 4.5 ) {
-      if( isOutofBounds(ball.position.x, ball.position.z) ) {
-        console.log( "Ball out of bounds (", ball.position.x, ",", ball.position.z, "), resetting position");
-        ball.velocity.set(0, 0, 0);
-        isMoving = false;
-        ball.position.set(startX, 0.07, startZ);
-        panToStart();
-      }
-      if( isMoving ) {
-        moveCameraToBall(); 
-        controls.enabled = false;
-        controls.update();
-      }
-      else {
-        controls.enabled = true;
-        controls.update();
-      }
-      ball.position.add(ball.velocity);
-      
-      const overHole = isOverHole(ball.position);
-      
-      if (overHole) {
-        const holeDepth = 0.05;
-        const fallRate = 0.005;
-        
-        if (ball.position.y > (0.07 - holeDepth)) {
-          ball.position.y -= fallRate;
-          ball.velocity.multiplyScalar(0.95);
-          
-          const holeDirection = new THREE.Vector3()
-            .subVectors(holeTarget, ball.position)
-            .normalize()
-            .multiplyScalar(0.002);
-          ball.velocity.add(holeDirection);
-        } else {
-          ball.position.y = 0.07 - holeDepth;
-          ball.velocity.set(0, 0, 0);
-          isMoving = false;
-          
-          if (!levelComplete && checkWin(ball.position.x, ball.position.z, ball.position.y)) {
-            finishSound.play();
-            levelComplete = true;
-            setTimeout(() => {
-              const overlay = document.getElementById('splash-overlay');
-              overlay.style.display = 'flex';
-              splashVisible = true;
-
-            }, 500); 
-            return;
-          }
-        }
-      } else {
-        // Ball is not over hole - normal ground physics
-        ball.position.y = 0.07; // Keep ball at ground level
-        ball.velocity.multiplyScalar(0.99); // Normal friction
-      }
-      
-      // Wall collision detection (unchanged)
-      const normal = collidesWithWall(ball);
-      if (normal) {
-        const velocityDot = ball.velocity.dot(normal);
-        const reflected = ball.velocity.clone().sub(normal.multiplyScalar(2 * velocityDot)).multiplyScalar(0.8);
-        ball.velocity.copy(reflected);
-        
-        if (reflected.length() < 0.01) {
-          reflected.set(0, 0, 0); 
-        }
-        const backstep = reflected.clone().normalize().multiplyScalar(0.08);
-        ball.position.add(backstep);
-      }
-      
-      // Check if ball has stopped moving
-      if (ball.velocity.length() < 0.001) {
-        ball.velocity.set(0, 0, 0);
-        
-        if (isMoving) {
-          isMoving = false;
-          // Only check win if ball is actually in the hole (not just stopped near it)
-          if (overHole && ball.position.y < 0.05) {
-            if (checkWin(ball.position.x, ball.position.z, ball.position.y)) {
-              const overlay = document.getElementById('splash-overlay');
-              overlay.style.display = 'flex';
-              splashVisible = true;
-            }
-          }
-        }
-      } else {
-        isMoving = true;
-      }
-
-    } else {
-      if (ball && ball.velocity) {
-        ball.velocity.set(0, 0, 0);
-        isMoving = false;
-      }
+  if (
+    ball &&
+    ball.velocity &&
+    Number.isFinite(ball.velocity.x) &&
+    Number.isFinite(ball.velocity.y) &&
+    Number.isFinite(ball.velocity.z)
+  ) {
+    console.log("x:", ball.position.x, "z:", ball.position.z);
+    //if( ball.position.x < -0.5 || ball.position.x > 4.5 || ball.position.z < -0.5 || ball.position.z > 4.5 ) {
+    if (isOutofBounds(ball.position.x, ball.position.z)) {
+      console.log(
+        "Ball out of bounds (",
+        ball.position.x,
+        ",",
+        ball.position.z,
+        "), resetting position",
+      );
+      ball.velocity.set(0, 0, 0);
+      isMoving = false;
+      ball.position.set(startX, 0.07, startZ);
+      panToStart();
     }
+    if (isMoving) {
+      moveCameraToBall();
+      controls.enabled = false;
+      controls.update();
+    } else {
+      controls.enabled = true;
+      controls.update();
+    }
+    ball.position.add(ball.velocity);
+
+    const overHole = isOverHole(ball.position);
+
+    if (overHole) {
+      const holeDepth = 0.05;
+      const fallRate = 0.005;
+
+      if (ball.position.y > 0.07 - holeDepth) {
+        ball.position.y -= fallRate;
+        ball.velocity.multiplyScalar(0.95);
+
+        const holeDirection = new THREE.Vector3()
+          .subVectors(holeTarget, ball.position)
+          .normalize()
+          .multiplyScalar(0.002);
+        ball.velocity.add(holeDirection);
+      } else {
+        ball.position.y = 0.07 - holeDepth;
+        ball.velocity.set(0, 0, 0);
+        isMoving = false;
+
+        if (
+          !levelComplete &&
+          checkWin(ball.position.x, ball.position.z, ball.position.y)
+        ) {
+          finishSound.play();
+          levelComplete = true;
+          setTimeout(() => {
+            const overlay = document.getElementById("splash-overlay");
+            overlay.style.display = "flex";
+            splashVisible = true;
+          }, 500);
+          return;
+        }
+      }
+    } else {
+      // Ball is not over hole - normal ground physics
+      ball.position.y = 0.07; // Keep ball at ground level
+      ball.velocity.multiplyScalar(0.99); // Normal friction
+    }
+
+    // Wall collision detection (unchanged)
+    const normal = collidesWithWall(ball);
+    if (normal) {
+      const velocityDot = ball.velocity.dot(normal);
+      const reflected = ball.velocity
+        .clone()
+        .sub(normal.multiplyScalar(2 * velocityDot))
+        .multiplyScalar(0.8);
+      ball.velocity.copy(reflected);
+
+      if (reflected.length() < 0.01) {
+        reflected.set(0, 0, 0);
+      }
+      const backstep = reflected.clone().normalize().multiplyScalar(0.08);
+      ball.position.add(backstep);
+    }
+
+    // Check if ball has stopped moving
+    if (ball.velocity.length() < 0.001) {
+      ball.velocity.set(0, 0, 0);
+
+      if (isMoving) {
+        isMoving = false;
+        // Only check win if ball is actually in the hole (not just stopped near it)
+        if (overHole && ball.position.y < 0.05) {
+          if (checkWin(ball.position.x, ball.position.z, ball.position.y)) {
+            const overlay = document.getElementById("splash-overlay");
+            overlay.style.display = "flex";
+            splashVisible = true;
+          }
+        }
+      }
+    } else {
+      isMoving = true;
+    }
+  } else {
+    if (ball && ball.velocity) {
+      ball.velocity.set(0, 0, 0);
+      isMoving = false;
+    }
+  }
   let movementDirection;
   if (keyStates.ArrowUp) {
     //console.log(camera.position.x, camera.position.z);
@@ -644,15 +653,15 @@ function animate() {
   );
   const distanceToCenter = cameraToCenter.length();
 
-    //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
-    //console.log("OLD values", currentX, currentZ);
-    if( distanceToCenter > domeRadius ) {
-      cameraToCenter.normalize().multiplyScalar(domeRadius);
-      camera.position.copy(domeCenter).add(cameraToCenter);
-      camera.position.y = currentY;
-    }
-    camera.position.y = Math.max(0.5, camera.position.y);
-    camera.position.y = Math.min(5, camera.position.y);
+  //domeRadius = Math.max(bounds.width, bounds.height) * 1.1;
+  //console.log("OLD values", currentX, currentZ);
+  if (distanceToCenter > domeRadius) {
+    cameraToCenter.normalize().multiplyScalar(domeRadius);
+    camera.position.copy(domeCenter).add(cameraToCenter);
+    camera.position.y = currentY;
+  }
+  camera.position.y = Math.max(0.5, camera.position.y);
+  camera.position.y = Math.min(5, camera.position.y);
 
   scene.traverse((child) => {
     const mat = child.material;
@@ -665,12 +674,11 @@ function animate() {
   });
 
   if (!splashVisible) {
-    if( isMoving ) {
+    if (isMoving) {
       controls.enabled = false;
       controls.target.copy(ball.position);
       controls.update();
-    }
-    else{
+    } else {
       controls.enabled = true;
       controls.update();
     }

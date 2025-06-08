@@ -1,5 +1,5 @@
-import Toastify from 'toastify-js';
-import 'toastify-js/src/toastify.css';
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 
 // can consider later making gridSize dynamic, but for the scope of this project,
 // keep constant.
@@ -62,17 +62,15 @@ function createRulesPanel() {
   backBtn.style.width = "250px";
   backBtn.style.height = "50px";
   backBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  e.preventDefault();
+    e.stopPropagation();
+    e.preventDefault();
 
-  const splash = document.getElementById("splash-overlay");
-  if (splash) splash.style.display = "flex";
+    const splash = document.getElementById("splash-overlay");
+    if (splash) splash.style.display = "flex";
 
-  const editor = document.getElementById("editor-overlay");
-  if (editor) editor.remove();
-
-  
-});
+    const editor = document.getElementById("editor-overlay");
+    if (editor) editor.remove();
+  });
 
   rules.appendChild(backBtn);
   return rules;
@@ -137,24 +135,25 @@ function createEditor(rows = gridSize, cols = gridSize) {
   playBtn.style.width = "250px";
   playBtn.style.height = "50px";
   playBtn.addEventListener("click", (e) => {
-  const flatTiles = grid.flatMap((row, z) =>
-    row.map((value, x) => ({ type: value, x, z }))
-  );
+    const flatTiles = grid.flatMap((row, z) =>
+      row.map((value, x) => ({ type: value, x, z })),
+    );
 
-  const startCount = flatTiles.filter(t => t.type === "S").length;
-  const holeCount = flatTiles.filter(t => t.type === "X").length;
+    const startCount = flatTiles.filter((t) => t.type === "S").length;
+    const holeCount = flatTiles.filter((t) => t.type === "X").length;
 
-  if (startCount !== 1 || holeCount < 1) {
-    e.preventDefault();
-    e.stopPropagation();
-    Toastify({
-      text: "Level must contain exactly one Start (S) and a Hole (X).",
-      duration: 3000,
-      gravity: "top",
-      position: "right", 
-      backgroundColor: "#ff4757",
-      close: true,
-    }).showToast();    return;
+    if (startCount !== 1 || holeCount < 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      Toastify({
+        text: "Level must contain exactly one Start (S) and a Hole (X).",
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#ff4757",
+        close: true,
+      }).showToast();
+      return;
     }
 
     window.customlevel = grid;
