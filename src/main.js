@@ -264,6 +264,7 @@ function collidesWithWall(ball) {
 
 function loadAndStartLevel(holeKey) {
   levelComplete = false;
+  isMoving = false;
   window.strokes = 0;
   const counter = document.getElementById("stroke-counter");
   if (counter) counter.textContent = "Par: 0";
